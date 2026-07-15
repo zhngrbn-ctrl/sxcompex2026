@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>汉语趋向表达实验（预实验）</title>
+<title>汉语研究实验</title>
 <link href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css" rel="stylesheet">
 <script src="https://unpkg.com/jspsych@8.2.1"></script>
 <script src="https://unpkg.com/@jspsych/plugin-html-button-response"></script>
@@ -245,7 +245,7 @@ function eptTimeline(){
 }
 function ajtTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>句子自然度判断任务</h3><div class="info-box"><p>每道题先给出一个情境，情境后面会有一句引导语，并呈现一个<strong style="color:#2563eb">蓝色句子</strong>。</p><p>请把前面的情境当作已经发生的事实，判断<strong style="color:#2563eb">蓝色句子</strong>放在该情境中是否自然。您只需要评价蓝色句子的自然度，不需要判断情境本身是否合理。</p><p>1＝非常不自然；2＝比较不自然；3＝介于自然和不自然之间；4＝比较自然；5＝非常自然。</p><p>请根据第一感觉作答，不需要反复修改。</p></div>`,choices:['进行练习']});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>句子自然度判断任务</h3><div class="info-box"><p>每道题先给出一个情境，情境后面会有一句引导语，并呈现一个<strong style="color:#2563eb">蓝色句子</strong>。</p><p>请根据前面的情境，判断<strong style="color:#2563eb">蓝色句子</strong>是否自然、合适。</p><p>请注意句子的语法、动作方向和人物位置。不需要判断情境本身是否合理。</p><p>1＝非常不自然；2＝比较不自然；3＝介于自然和不自然之间；4＝比较自然；5＝非常自然。</p><p>请根据第一感觉选择1—5分。</p></div>`,choices:['进行练习']});
  t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习1</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王的衣服全湿了。</div>',labels:scale,required:true}],button_label:'下一道练习'});
  t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习2</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王全衣服湿了。</div>',labels:scale,required:true}],button_label:'提交练习'});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务没有标准答案，请结合具体情境，根据自己的第一感觉判断句子的自然程度。</div>',choices:['开始正式任务']});
