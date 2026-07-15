@@ -18,7 +18,7 @@ body{background:#eef2f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
 h1,h2,h3{color:#102033}.jspsych-btn{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:13px 28px;font-size:16px;margin-top:24px}.jspsych-btn:hover{background:#1d4ed8}
 input[type=text],input[type=number],select,textarea{border:1px solid #cbd5e1;border-radius:7px;padding:10px 12px;font-size:16px;font-family:inherit;box-sizing:border-box}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.cloze-passage{font-size:18px;line-height:2.35;text-align:left}.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-left:5px solid #3b82f6;padding:18px 22px;border-radius:8px;text-align:left;line-height:1.85}.warn-box{background:#fff7ed;border:1px solid #fed7aa;padding:15px 18px;border-radius:8px;text-align:left}.ept-wrap{max-width:1120px;margin:auto}.ept-image{display:block;width:100%;max-height:62vh;object-fit:contain;border:1px solid #d7dee8;border-radius:8px;background:white;cursor:zoom-in}.ept-image.zoomed{max-height:none;cursor:zoom-out}.ept-answer{width:92%;max-width:760px;height:54px;font-size:20px;margin-top:18px}.kaiti{font-family:KaiTi,STKaiti,"楷体",serif;font-size:25px;font-weight:600}.trial-counter{font-size:14px;color:#64748b;margin-bottom:10px}.ajt-context{font-size:18px;line-height:1.75;text-align:left;background:#f8fafc;padding:18px 20px;border-radius:8px;margin-bottom:22px}.ajt-sentence{font-family:KaiTi,STKaiti,"楷体",serif;font-size:27px;line-height:1.6;color:#111827}.jspsych-survey-likert-statement{margin-bottom:34px}.small-note{font-size:13px;color:#64748b}.break-card{text-align:center;line-height:1.9}@media(max-width:760px){.jspsych-content{padding:24px 18px}.ept-image{max-height:52vh}.ajt-sentence{font-size:23px}}
+.cloze-passage{font-size:18px;line-height:2.35;text-align:left}.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-left:5px solid #3b82f6;padding:18px 22px;border-radius:8px;text-align:left;line-height:1.85}.warn-box{background:#fff7ed;border:1px solid #fed7aa;padding:15px 18px;border-radius:8px;text-align:left}.ept-wrap{max-width:1120px;margin:auto}.ept-image{display:block;width:100%;max-height:62vh;object-fit:contain;border:1px solid #d7dee8;border-radius:8px;background:white;cursor:zoom-in}.ept-image.zoomed{max-height:none;cursor:zoom-out}.ept-answer{width:92%;max-width:760px;height:54px;font-size:20px;margin-top:18px}.kaiti{font-family:KaiTi,STKaiti,"楷体",serif;font-size:25px;font-weight:600}.trial-counter{font-size:14px;color:#64748b;margin-bottom:10px}.ajt-context{font-size:18px;line-height:1.75;text-align:left;background:#f8fafc;padding:18px 20px;border-radius:8px;margin-bottom:22px}.ajt-lead-in{margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:18px;font-weight:700;color:#334155}.ajt-sentence{font-family:KaiTi,STKaiti,"楷体",serif;font-size:27px;line-height:1.6;color:#2563eb;font-weight:600}.ept-question{font-size:21px;line-height:1.7;text-align:center;margin:18px auto 4px;color:#27364a}.ept-verb{font-family:KaiTi,STKaiti,"楷体",serif;font-size:24px;font-weight:700;color:#0f172a}.jspsych-survey-likert-statement{margin-bottom:34px}.small-note{font-size:13px;color:#64748b}.break-card{text-align:center;line-height:1.9}@media(max-width:760px){.jspsych-content{padding:24px 18px}.ept-image{max-height:52vh}.ajt-sentence{font-size:23px}}
 </style>
 </head><body><script>
 function getAgeOptions(){let s='<option value="" disabled selected>请选择</option>';for(let i=16;i<=60;i++)s+=`<option value="${i}">${i}岁</option>`;return s;}
@@ -39,7 +39,7 @@ const DATA_PIPE_EXPERIMENT_ID='IRsUduBNRMIB';
 const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
-jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v5_2026-07-15',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
+jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v10_2026-07-15',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1": "assets/ept_01.png", "2": "assets/ept_02.png", "3": "assets/ept_03.png", "4": "assets/ept_04.png", "5": "assets/ept_05.png", "6": "assets/ept_06.png", "7": "assets/ept_07.png", "8": "assets/ept_08.png", "9": "assets/ept_09.png", "10": "assets/ept_10.png", "11": "assets/ept_11.png", "12": "assets/ept_12.png", "13": "assets/ept_13.png", "14": "assets/ept_14.png", "15": "assets/ept_15.png", "16": "assets/ept_16.png", "17": "assets/ept_17.png", "18": "assets/ept_18.png", "19": "assets/ept_19.png", "20": "assets/ept_20.png", "21": "assets/ept_21.png", "22": "assets/ept_22.png", "23": "assets/ept_23.png", "24": "assets/ept_24.png", "25": "assets/ept_25.png", "26": "assets/ept_26.png", "27": "assets/ept_27.png", "28": "assets/ept_28.png"};
@@ -119,30 +119,30 @@ const eptItems=makeEptOrder(eptItemsRaw);
 
 // ---------- AJT target frames; each participant sees only one version ----------
 const ajtFrames=[
-{id:'V1_01',lead_in:'看到这一幕，我说：',variable:'V1',scene:'room',context:'我在房间里等朋友。朋友原来站在门外，后来打开门进入房间。',A:'朋友推开门走进来了。',B:'朋友推开门走进去了。',legal:'A'},
-{id:'V1_02',lead_in:'看着弟弟离开，我说：',variable:'V1',scene:'classroom',context:'我和弟弟原来都在教室里。下课以后，弟弟先离开教室，我还留在里面。',A:'弟弟背着书包走出去了。',B:'弟弟背着书包走出来了。',legal:'A'},
-{id:'V1_03',lead_in:'看到同学向我这边走来，我说：',variable:'V1',scene:'stairs',context:'我站在一楼门口等同学。同学原来在三楼，看到我以后开始下楼。',A:'同学很快跑下来了。',B:'同学很快跑下去了。',legal:'A'},
-{id:'V1_04',lead_in:'看着哥哥离开一楼，我说：',variable:'V1',scene:'stairs',context:'我和哥哥原来都在一楼。哥哥要到三楼找老师，我继续留在一楼。',A:'哥哥拿着书走上去了。',B:'哥哥拿着书走上来了。',legal:'A'},
-{id:'V1_05',lead_in:'看到小狗的动作，我说：',variable:'V1',scene:'tent',context:'我坐在帐篷里面。小狗原来在帐篷外面，后来钻到了里面。',A:'小狗从门口钻进来了。',B:'小狗从门口钻进去了。',legal:'A'},
-{id:'V1_06',lead_in:'看着朋友离开，我说：',variable:'V1',scene:'building',context:'我和朋友原来都在大楼里面。朋友听到外面有人叫他，就离开了大楼，我仍然留在里面。',A:'朋友听见声音跑出去了。',B:'朋友听见声音跑出来了。',legal:'A'},
-{id:'V1_07',lead_in:'看到妹妹逐渐接近我，我说：',variable:'V1',scene:'stand',context:'我站在看台上等妹妹。妹妹原来在看台下面，后来开始往上走。',A:'妹妹一步一步爬上来了。',B:'妹妹一步一步爬上去了。',legal:'A'},
-{id:'V1_08',lead_in:'看着小王离我越来越远，我说：',variable:'V1',scene:'hill',context:'我和小王原来都站在山坡上方。后来，小王从我身边向坡下跑去，离我越来越远，我仍然留在原地。',A:'小王很快跑下去了。',B:'小王很快跑下来了。',legal:'A'},
-{id:'V2_01',lead_in:'看到这一幕，我说：',variable:'V2',scene:'office',context:'我在办公室里等同事。同事从走廊进入办公室，把一份文件交给我。',A:'同事拿着文件走进办公室来了。',B:'同事拿着文件走进来办公室了。',legal:'A'},
-{id:'V2_02',lead_in:'看着小王离开，我说：',variable:'V2',scene:'classroom',context:'我和小王原来都在教室里。下课以后，小王离开教室，到操场参加训练。',A:'小王背着书包走出教室去了。',B:'小王背着书包走出去教室了。',legal:'A'},
-{id:'V2_03',lead_in:'看到朋友走到我这里，我说：',variable:'V2',scene:'shop',context:'我站在商店门口等朋友。朋友买完东西以后，从商店里面走到我这里。',A:'朋友提着袋子走出商店来了。',B:'朋友提着袋子走出来商店了。',legal:'A'},
-{id:'V2_04',lead_in:'听完弟弟在电话里说的情况，我说：',variable:'V2',scene:'school',context:'我在宿舍给弟弟打电话。弟弟当时站在教学楼外，后来进入教学楼上课。',A:'弟弟拿着课本走进教学楼去了。',B:'弟弟拿着课本走进去教学楼了。',legal:'A'},
-{id:'V2_05',lead_in:'看到同学来到我面前，我说：',variable:'V2',scene:'library',context:'我在图书馆里等同学。同学从门外进入图书馆，把借来的书还给我。',A:'同学抱着书走进图书馆来了。',B:'同学抱着书走进来图书馆了。',legal:'A'},
-{id:'V2_06',lead_in:'看着客人离开，我说：',variable:'V2',scene:'restaurant',context:'我和客人原来都在饭店里。吃完饭以后，客人离开饭店，到停车场取车。',A:'客人结完账走出饭店去了。',B:'客人结完账走出去饭店了。',legal:'A'},
-{id:'V2_07',lead_in:'看到工人走到我这里，我说：',variable:'V2',scene:'warehouse',context:'我站在仓库门外。工人从仓库里面走出来，把钥匙交给我。',A:'工人拿着钥匙走出仓库来了。',B:'工人拿着钥匙走出来仓库了。',legal:'A'},
-{id:'V2_08',lead_in:'听完妹妹在电话里说的情况，我说：',variable:'V2',scene:'cinema',context:'我在家里和妹妹打电话。妹妹当时站在电影院外，后来进入电影院看电影。',A:'妹妹买完票走进电影院去了。',B:'妹妹买完票走进去电影院了。',legal:'A'},
-{id:'V3_01',lead_in:'看到老师来到我面前，我说：',variable:'V3',scene:'office',context:'我在校长办公室里等老师。老师从走廊进入办公室，把一张表交给我。',A:'老师拿着表走进校长办公室来了。',B:'老师拿着表走进校长办公室去了。',legal:'A'},
-{id:'V3_02',lead_in:'看着哥哥离开，我说：',variable:'V3',scene:'dorm',context:'我和哥哥原来都在宿舍里。哥哥接到朋友的电话以后离开宿舍，我仍然留在里面。',A:'哥哥接完电话跑出宿舍去了。',B:'哥哥接完电话跑出宿舍来了。',legal:'A'},
-{id:'V3_03',lead_in:'看到朋友走到我这里，我说：',variable:'V3',scene:'cinema',context:'我站在电影院门口等朋友。电影结束以后，朋友从电影院里面走到我这里。',A:'朋友跟着人群走出电影院来了。',B:'朋友跟着人群走出电影院去了。',legal:'A'},
-{id:'V3_04',lead_in:'听完小李在电话里说的情况，我说：',variable:'V3',scene:'bank',context:'我在学校给小李打电话。小李当时站在银行门外，后来进入银行办事。',A:'小李拿着材料走进银行去了。',B:'小李拿着材料走进银行来了。',legal:'A'},
-{id:'V3_05',lead_in:'看到班长来到我面前，我说：',variable:'V3',scene:'office',context:'我在老师的办公室里。班长从外面进入办公室，把作业交给我。',A:'班长抱着作业走进老师的办公室来了。',B:'班长抱着作业走进老师的办公室去了。',legal:'A'},
-{id:'V3_06',lead_in:'看着同学离开，我说：',variable:'V3',scene:'lab',context:'我和同学原来都在电脑教室里。同学上完课以后离开电脑教室，到食堂吃饭。',A:'同学收好东西走出电脑教室去了。',B:'同学收好东西走出电脑教室来了。',legal:'A'},
-{id:'V3_07',lead_in:'看到工人走到我这里，我说：',variable:'V3',scene:'building',context:'我在大楼门外等工人。工人检查完设备以后，从大楼里面走到我这里。',A:'工人拿着工具走出大楼来了。',B:'工人拿着工具走出大楼去了。',legal:'A'},
-{id:'V3_08',lead_in:'看到朋友发来的消息后，我说：',variable:'V3',scene:'gym',context:'我在宿舍和朋友发信息。朋友当时站在体育馆外，后来进入体育馆看比赛。',A:'朋友检完票走进体育馆去了。',B:'朋友检完票走进体育馆来了。',legal:'A'}];
+{id:'V1_01',lead_in:'这时，我说：',variable:'V1',scene:'room',context:'我在房间里等朋友。朋友原来站在门外，后来打开门进入房间。',A:'朋友推开门走进来了。',B:'朋友推开门走进去了。',legal:'A'},
+{id:'V1_02',lead_in:'这时，我说：',variable:'V1',scene:'classroom',context:'我和弟弟原来都在教室里。下课以后，弟弟先离开教室，我还留在里面。',A:'弟弟背着书包走出去了。',B:'弟弟背着书包走出来了。',legal:'A'},
+{id:'V1_03',lead_in:'这时，我说：',variable:'V1',scene:'stairs',context:'我站在一楼门口等同学。同学原来在三楼，看到我以后开始下楼。',A:'同学很快跑下来了。',B:'同学很快跑下去了。',legal:'A'},
+{id:'V1_04',lead_in:'这时，我说：',variable:'V1',scene:'stairs',context:'我和哥哥原来都在一楼。哥哥要到三楼找老师，我继续留在一楼。',A:'哥哥拿着书走上去了。',B:'哥哥拿着书走上来了。',legal:'A'},
+{id:'V1_05',lead_in:'这时，我说：',variable:'V1',scene:'tent',context:'我坐在帐篷里面。小狗原来在帐篷外面，后来钻到了里面。',A:'小狗从门口钻进来了。',B:'小狗从门口钻进去了。',legal:'A'},
+{id:'V1_06',lead_in:'这时，我说：',variable:'V1',scene:'building',context:'我和朋友原来都在大楼里面。朋友听到外面有人叫他，就离开了大楼，我仍然留在里面。',A:'朋友听见声音跑出去了。',B:'朋友听见声音跑出来了。',legal:'A'},
+{id:'V1_07',lead_in:'这时，我说：',variable:'V1',scene:'stand',context:'我站在看台上等妹妹。妹妹原来在看台下面，后来开始往上走。',A:'妹妹一步一步爬上来了。',B:'妹妹一步一步爬上去了。',legal:'A'},
+{id:'V1_08',lead_in:'这时，我说：',variable:'V1',scene:'hill',context:'我和小王原来都站在山坡上方。后来，小王从我身边向坡下跑去，离我越来越远，我仍然留在原地。',A:'小王很快跑下去了。',B:'小王很快跑下来了。',legal:'A'},
+{id:'V2_01',lead_in:'这时，我说：',variable:'V2',scene:'office',context:'我在办公室里等同事。同事从走廊进入办公室，把一份文件交给我。',A:'同事拿着文件走进办公室来了。',B:'同事拿着文件走进来办公室了。',legal:'A'},
+{id:'V2_02',lead_in:'这时，我说：',variable:'V2',scene:'classroom',context:'我和小王原来都在教室里。下课以后，小王离开教室，到操场参加训练。',A:'小王背着书包走出教室去了。',B:'小王背着书包走出去教室了。',legal:'A'},
+{id:'V2_03',lead_in:'这时，我说：',variable:'V2',scene:'shop',context:'我站在商店门口等朋友。朋友买完东西以后，从商店里面走到我这里。',A:'朋友提着袋子走出商店来了。',B:'朋友提着袋子走出来商店了。',legal:'A'},
+{id:'V2_04',lead_in:'得知这个情况后，我说：',variable:'V2',scene:'school',context:'我在宿舍给弟弟打电话。弟弟当时站在教学楼外，后来进入教学楼上课。',A:'弟弟拿着课本走进教学楼去了。',B:'弟弟拿着课本走进去教学楼了。',legal:'A'},
+{id:'V2_05',lead_in:'这时，我说：',variable:'V2',scene:'library',context:'我在图书馆里等同学。同学从门外进入图书馆，把借来的书还给我。',A:'同学抱着书走进图书馆来了。',B:'同学抱着书走进来图书馆了。',legal:'A'},
+{id:'V2_06',lead_in:'这时，我说：',variable:'V2',scene:'restaurant',context:'我和客人原来都在饭店里。吃完饭以后，客人离开饭店，到停车场取车。',A:'客人结完账走出饭店去了。',B:'客人结完账走出去饭店了。',legal:'A'},
+{id:'V2_07',lead_in:'这时，我说：',variable:'V2',scene:'warehouse',context:'我站在仓库门外。工人从仓库里面走出来，把钥匙交给我。',A:'工人拿着钥匙走出仓库来了。',B:'工人拿着钥匙走出来仓库了。',legal:'A'},
+{id:'V2_08',lead_in:'得知这个情况后，我说：',variable:'V2',scene:'cinema',context:'我在家里和妹妹打电话。妹妹当时站在电影院外，后来进入电影院看电影。',A:'妹妹买完票走进电影院去了。',B:'妹妹买完票走进去电影院了。',legal:'A'},
+{id:'V3_01',lead_in:'这时，我说：',variable:'V3',scene:'office',context:'我在校长办公室里等老师。老师从走廊进入办公室，把一张表交给我。',A:'老师拿着表走进校长办公室来了。',B:'老师拿着表走进校长办公室去了。',legal:'A'},
+{id:'V3_02',lead_in:'这时，我说：',variable:'V3',scene:'dorm',context:'我和哥哥原来都在宿舍里。哥哥接到朋友的电话以后离开宿舍，我仍然留在里面。',A:'哥哥接完电话跑出宿舍去了。',B:'哥哥接完电话跑出宿舍来了。',legal:'A'},
+{id:'V3_03',lead_in:'这时，我说：',variable:'V3',scene:'cinema',context:'我站在电影院门口等朋友。电影结束以后，朋友从电影院里面走到我这里。',A:'朋友跟着人群走出电影院来了。',B:'朋友跟着人群走出电影院去了。',legal:'A'},
+{id:'V3_04',lead_in:'得知这个情况后，我说：',variable:'V3',scene:'bank',context:'我在学校给小李打电话。小李当时站在银行门外，后来进入银行办事。',A:'小李拿着材料走进银行去了。',B:'小李拿着材料走进银行来了。',legal:'A'},
+{id:'V3_05',lead_in:'这时，我说：',variable:'V3',scene:'office',context:'我在老师的办公室里。班长从外面进入办公室，把作业交给我。',A:'班长抱着作业走进老师的办公室来了。',B:'班长抱着作业走进老师的办公室去了。',legal:'A'},
+{id:'V3_06',lead_in:'这时，我说：',variable:'V3',scene:'lab',context:'我和同学原来都在电脑教室里。同学上完课以后离开电脑教室，到食堂吃饭。',A:'同学收好东西走出电脑教室去了。',B:'同学收好东西走出电脑教室来了。',legal:'A'},
+{id:'V3_07',lead_in:'这时，我说：',variable:'V3',scene:'building',context:'我在大楼门外等工人。工人检查完设备以后，从大楼里面走到我这里。',A:'工人拿着工具走出大楼来了。',B:'工人拿着工具走出大楼去了。',legal:'A'},
+{id:'V3_08',lead_in:'得知这个情况后，我说：',variable:'V3',scene:'gym',context:'我在宿舍和朋友发信息。朋友当时站在体育馆外，后来进入体育馆看比赛。',A:'朋友检完票走进体育馆去了。',B:'朋友检完票走进体育馆来了。',legal:'A'}];
 const listPatternA={V1:['A','B','A','B','B','A','B','A'],V2:['B','A','B','A','A','B','A','B'],V3:['A','B','B','A','B','A','A','B']};
 const listPatternB={V1:['B','A','B','A','A','B','A','B'],V2:['A','B','A','B','B','A','B','A'],V3:['B','A','A','B','A','B','B','A']};
 const patterns=ajt_list==='A'?listPatternA:listPatternB; const counters={V1:0,V2:0,V3:0};
@@ -171,7 +171,7 @@ const ajtFillers=[
 {id:'F21',context:"小刘以前不会做饭，现在已经学会了。",condition:'grammatical',sentence:'小刘现在会做几种中国菜了。',scene:'cooking'},
 {id:'F22',context:"小刘以前不会做饭，现在已经学会了。",condition:'ungrammatical',sentence:'小刘现在会了做几种中国菜。',scene:'cooking'},
 {id:'F23',context:"我找了很长时间，最后终于找到了手机。",condition:'grammatical',sentence:'我的手机原来在书包里。',scene:'phone'},
-{id:'F24',context:"我找了很长时间，最后终于找到了手机。",condition:'ungrammatical',sentence:'我的手机在原来书包里。',scene:'phone'}].map(x=>({...x,variable:null}));
+{id:'F24',context:"我找了很长时间，最后终于找到了手机。",condition:'ungrammatical',sentence:'我的手机在原来书包里。',scene:'phone'}].map(x=>({...x,variable:null,lead_in:x.lead_in||'在这个情境中，有人这样说：'}));
 const ajtItems=makeAjtOrder(ajtTargets,ajtFillers);
 const scale=['1<br><span class="small-note">非常不自然</span>','2<br><span class="small-note">比较不自然</span>','3<br><span class="small-note">介于自然和不自然之间</span>','4<br><span class="small-note">比较自然</span>','5<br><span class="small-note">非常自然</span>'];
 
@@ -238,18 +238,18 @@ timeline.push({timeline:nativePre,conditional_function:()=>{let x=jsPsych.data.g
 function eptTimeline(){
  let t=[];
  t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人或动物。</p><p><strong>请使用括号里的动词，用一个完整的句子说明你（A）看到B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须使用括号里的动词，并写成一个完整、自然的句子，不要只写一个词或短语；<br>2. 不会写某个汉字时，可以使用拼音代替；<br>3. 请根据图片中A的位置和B的变化，写出你认为最自然、最准确的句子。</p><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
- t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="assets/practice.png" onclick="this.classList.toggle('zoomed')" alt="练习图片"><p class="kaiti">请使用动词：<strong>（睡觉）</strong></p></div>`,html:'<input class="ept-answer" name="practice" required minlength="2" placeholder="请在这里输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:'assets/practice.png'}});
+ t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="assets/practice.png" onclick="this.classList.toggle('zoomed')" alt="练习图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer" name="practice" required minlength="2" placeholder="请在这里输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:'assets/practice.png'}});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请根据左右两幅图，使用括号里的动词，写一个完整、自然的句子。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
- eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div><img class="ept-image" src="${it.img}" onclick="this.classList.toggle('zoomed')" alt="实验图片"><p class="kaiti">请使用动词：<strong>（${it.verb}）</strong></p></div>`,html:`<input class="ept-answer" name="ept_${it.id}" required minlength="2" autocomplete="off" placeholder="请在这里输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1}}));
+ eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div><img class="ept-image" src="${it.img}" onclick="this.classList.toggle('zoomed')" alt="实验图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：${it.verb}）</span></div></div>`,html:`<input class="ept-answer" name="ept_${it.id}" required minlength="2" autocomplete="off" placeholder="请在这里输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1}}));
  return t;
 }
 function ajtTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>句子自然度判断任务</h3><div class="info-box"><p>每道题先给出一个情境，再给出一个句子。请把前面的情境当作已经发生的事实，您的任务只是判断后面的句子放在这个情境中是否自然。</p><p>1＝非常不自然；2＝比较不自然；3＝介于自然和不自然之间；4＝比较自然；5＝非常自然。</p><p>请根据第一感觉作答，不需要反复修改。</p></div>`,choices:['进行练习']});
- t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习1</div><div class="ajt-context">外面正在下大雨，小王没有带伞。</div><div class="ajt-sentence">小王的衣服全湿了。</div>',labels:scale,required:true}],button_label:'下一道练习'});
- t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习2</div><div class="ajt-context">外面正在下大雨，小王没有带伞。</div><div class="ajt-sentence">小王全衣服湿了。</div>',labels:scale,required:true}],button_label:'提交练习'});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>句子自然度判断任务</h3><div class="info-box"><p>每道题先给出一个情境，情境后面会有一句引导语，并呈现一个<strong style="color:#2563eb">蓝色句子</strong>。</p><p>请把前面的情境当作已经发生的事实，判断<strong style="color:#2563eb">蓝色句子</strong>放在该情境中是否自然。您只需要评价蓝色句子的自然度，不需要判断情境本身是否合理。</p><p>1＝非常不自然；2＝比较不自然；3＝介于自然和不自然之间；4＝比较自然；5＝非常自然。</p><p>请根据第一感觉作答，不需要反复修改。</p></div>`,choices:['进行练习']});
+ t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习1</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王的衣服全湿了。</div>',labels:scale,required:true}],button_label:'下一道练习'});
+ t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习2</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王全衣服湿了。</div>',labels:scale,required:true}],button_label:'提交练习'});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务没有标准答案，请结合具体情境，根据自己的第一感觉判断句子的自然程度。</div>',choices:['开始正式任务']});
- ajtItems.forEach((it,i)=>t.push({type:jsPsychSurveyLikert,questions:[{prompt:`<div class="trial-counter">判断题 ${i+1} / ${ajtItems.length}</div><div class="ajt-context">${it.context}</div>${it.lead_in?`<div style="text-align:left;max-width:760px;margin:14px auto 6px;font-size:18px;font-weight:700;color:#475569;">${it.lead_in}</div>`:''}<div class="ajt-sentence">${it.sentence}</div>`,labels:scale,required:true,name:`ajt_${it.id}`}],button_label:'下一题',data:{task_type:'AJT',item_id:it.id,variable:it.variable||'filler',condition:it.condition,version:it.version||null,scene:it.scene,stimulus_context:it.context,stimulus_lead_in:it.lead_in||null,stimulus_sentence:it.sentence,presentation_order:i+1}}));
+ ajtItems.forEach((it,i)=>t.push({type:jsPsychSurveyLikert,questions:[{prompt:`<div class="trial-counter">判断题 ${i+1} / ${ajtItems.length}</div><div class="ajt-context">${it.context}<div class="ajt-lead-in">${it.lead_in||'在这个情境中，有人这样说：'}</div></div><div class="ajt-sentence">${it.sentence}</div>`,labels:scale,required:true,name:`ajt_${it.id}`}],button_label:'下一题',data:{task_type:'AJT',item_id:it.id,variable:it.variable||'filler',condition:it.condition,version:it.version||null,scene:it.scene,stimulus_context:it.context,stimulus_lead_in:it.lead_in||null,stimulus_sentence:it.sentence,presentation_order:i+1}}));
  return t;
 }
 const EPT=eptTimeline(),AJT=ajtTimeline(); const first=task_order==='EPT_AJT'?EPT:AJT, second=task_order==='EPT_AJT'?AJT:EPT;
