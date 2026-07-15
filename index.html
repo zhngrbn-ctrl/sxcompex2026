@@ -39,13 +39,29 @@ const DATA_PIPE_EXPERIMENT_ID='IRsUduBNRMIB';
 const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
-jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v10_2026-07-15',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
+jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v14_2026-07-15',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1": "assets/ept_01.png", "2": "assets/ept_02.png", "3": "assets/ept_03.png", "4": "assets/ept_04.png", "5": "assets/ept_05.png", "6": "assets/ept_06.png", "7": "assets/ept_07.png", "8": "assets/ept_08.png", "9": "assets/ept_09.png", "10": "assets/ept_10.png", "11": "assets/ept_11.png", "12": "assets/ept_12.png", "13": "assets/ept_13.png", "14": "assets/ept_14.png", "15": "assets/ept_15.png", "16": "assets/ept_16.png", "17": "assets/ept_17.png", "18": "assets/ept_18.png", "19": "assets/ept_19.png", "20": "assets/ept_20.png", "21": "assets/ept_21.png", "22": "assets/ept_22.png", "23": "assets/ept_23.png", "24": "assets/ept_24.png", "25": "assets/ept_25.png", "26": "assets/ept_26.png", "27": "assets/ept_27.png", "28": "assets/ept_28.png"};
 
 // ---------- utilities ----------
 function shuffle(a){return jsPsych.randomization.shuffle(a.slice())}
+const VERB_PINYIN={
+ '睡觉':['shuijiao'],'跑':['pao'],'跳':['tiao'],'游':['you'],'骑':['qi'],'开':['kai'],'走':['zou'],'飞':['fei'],'划':['hua'],'钻':['zuan'],'爬':['pa'],
+ '写':['xie'],'拍':['pai'],'拉':['la'],'唱':['chang'],'跳舞':['tiaowu'],'借':['jie'],'弹':['tan'],'喝':['he'],'递':['di'],'扔':['reng'],'投':['tou']
+};
+function normalizeAnswer(x){return (x||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z\u4e00-\u9fff]/g,'');}
+function answerUsesVerb(answer,verb){const n=normalizeAnswer(answer);if(n.includes(verb))return true;return (VERB_PINYIN[verb]||[]).some(py=>n.includes(py));}
+function attachEptValidation(fieldName,verb,isPractice=false){
+ const form=document.querySelector('.jspsych-survey-html-form');if(!form)return;
+ form.addEventListener('submit',function(ev){
+  const input=form.querySelector(`[name="${fieldName}"]`);const raw=input?input.value.trim():'';const compact=normalizeAnswer(raw);
+  let msg='';
+  if(!answerUsesVerb(raw,verb)) msg=`请在句子中使用括号里的动词“${verb}”。不会写汉字时，可以写拼音。`;
+  else if(compact.length<4) msg='请写一个完整句子，不要只写一个词或短语。';
+  if(msg){ev.preventDefault();ev.stopImmediatePropagation();alert(msg);if(input)input.focus();}
+ },true);
+}
 function noThreeSame(arr,key){for(let i=2;i<arr.length;i++)if(arr[i][key]===arr[i-1][key]&&arr[i][key]===arr[i-2][key])return false;return true}
 function makeEptOrder(items){for(let attempt=0;attempt<3000;attempt++){let x=shuffle(items);let ok=true;for(let i=1;i<x.length;i++){if(x[i].scene===x[i-1].scene)ok=false;if(x[i].family&&x[i].family===x[i-1].family&&x[i].type==='target'&&x[i-1].type==='target')ok=false;}if(ok&&noThreeSame(x,'type'))return x;}return items;}
 function blockIsGood(z,previous){
@@ -143,40 +159,40 @@ const ajtFrames=[
 {id:'V3_06',lead_in:'这时，我说：',variable:'V3',scene:'lab',context:'我和同学原来都在电脑教室里。同学上完课以后离开电脑教室，到食堂吃饭。',A:'同学收好东西走出电脑教室去了。',B:'同学收好东西走出电脑教室来了。',legal:'A'},
 {id:'V3_07',lead_in:'这时，我说：',variable:'V3',scene:'building',context:'我在大楼门外等工人。工人检查完设备以后，从大楼里面走到我这里。',A:'工人拿着工具走出大楼来了。',B:'工人拿着工具走出大楼去了。',legal:'A'},
 {id:'V3_08',lead_in:'得知这个情况后，我说：',variable:'V3',scene:'gym',context:'我在宿舍和朋友发信息。朋友当时站在体育馆外，后来进入体育馆看比赛。',A:'朋友检完票走进体育馆去了。',B:'朋友检完票走进体育馆来了。',legal:'A'}];
-const listPatternA={V1:['A','B','A','B','B','A','B','A'],V2:['B','A','B','A','A','B','A','B'],V3:['A','B','B','A','B','A','A','B']};
-const listPatternB={V1:['B','A','B','A','A','B','A','B'],V2:['A','B','A','B','B','A','B','A'],V3:['B','A','A','B','A','B','B','A']};
+const listPatternA={V1:['A','B','A','A','B','A','B','B'],V2:['B','A','B','A','A','B','A','B'],V3:['A','B','B','A','B','A','A','B']};
+const listPatternB={V1:['B','A','B','B','A','B','A','A'],V2:['A','B','A','B','B','A','B','A'],V3:['B','A','A','B','A','B','B','A']};
 const patterns=ajt_list==='A'?listPatternA:listPatternB; const counters={V1:0,V2:0,V3:0};
 const ajtTargets=ajtFrames.map(f=>{let ver=patterns[f.variable][counters[f.variable]++];return {...f,sentence:f[ver],version:ver,condition:ver===f.legal?'grammatical':'ungrammatical'};});
 const ajtFillers=[
 {id:'F01',context:"小王昨天第一次去那家饭店，觉得那里的菜很好吃。",condition:'grammatical',sentence:'小王昨天在那家饭店吃了一顿饭。',scene:'meal'},
 {id:'F02',context:"小李每天早上七点开始上课。",condition:'ungrammatical',sentence:'小李每天七点上课开始。',scene:'class'},
 {id:'F03',context:"外面很冷，小张出门以前多穿了一件衣服。",condition:'grammatical',sentence:'小张穿着一件厚外套出门了。',scene:'clothes'},
-{id:'F04',context:"桌子上原来有三本书，小王拿走了一本。",condition:'ungrammatical',sentence:'桌子上还两本书有。',scene:'books'},
+{id:'F04',context:"桌子上原来有三本书，小王拿走了一本。",condition:'ungrammatical',sentence:'桌子上还剩两本书有。',scene:'books'},
 {id:'F05',context:"老师说得太快，很多学生没有听清楚。",condition:'grammatical',sentence:'老师说得太快了。',scene:'class'},
 {id:'F06',context:"妹妹昨天连续看了两个小时的电影。",condition:'ungrammatical',sentence:'妹妹昨天看电影了两个小时。',scene:'movie'},
 {id:'F07',context:"小李的汉语比去年好了很多。",condition:'grammatical',sentence:'小李现在说汉语说得很流利。',scene:'language'},
 {id:'F08',context:"小王比小李高五厘米。",condition:'ungrammatical',sentence:'小王比小李五厘米高。',scene:'height'},
 {id:'F09',context:"我已经把老师要求的作业全部写完了。",condition:'grammatical',sentence:'我把作业写完了。',scene:'homework'},
-{id:'F10',context:"妈妈已经把水果洗干净了。",condition:'ungrammatical',sentence:'妈妈把干净了水果洗。',scene:'fruit'},
+{id:'F10',context:"妈妈已经把水果洗干净了。",condition:'ungrammatical',sentence:'妈妈把水果洗了干净。',scene:'fruit'},
 {id:'F11',context:"昨天晚上下了大雪，今天路上很滑。",condition:'grammatical',sentence:'今天路上走路要小心。',scene:'snow'},
 {id:'F12',context:"昨天晚上下了大雪，今天路上很滑。",condition:'ungrammatical',sentence:'今天路上要走路小心。',scene:'snow'},
 {id:'F13',context:"小陈生病了，所以今天没有参加考试。",condition:'grammatical',sentence:'因为小陈生病了，所以他没有参加考试。',scene:'exam'},
 {id:'F14',context:"小陈生病了，所以今天没有参加考试。",condition:'ungrammatical',sentence:'虽然小陈生病了，所以他没有参加考试。',scene:'exam'},
 {id:'F15',context:"房间里有三个学生，他们正在安静地看书。",condition:'grammatical',sentence:'房间里坐着三个学生。',scene:'room'},
-{id:'F16',context:"房间里有三个学生，他们正在安静地看书。",condition:'ungrammatical',sentence:'房间里坐了着三个学生。',scene:'room'},
+{id:'F16',context:"房间里有三个学生，他们正在安静地看书。",condition:'ungrammatical',sentence:'房间里坐着了三个学生。',scene:'room'},
 {id:'F17',context:"老师问了一个问题，小明马上回答对了。",condition:'grammatical',sentence:'小明回答得很快。',scene:'answer'},
 {id:'F18',context:"老师问了一个问题，小明马上回答对了。",condition:'ungrammatical',sentence:'小明很快得回答了。',scene:'answer'},
 {id:'F19',context:"我昨天在图书馆看到了一本很有意思的书。",condition:'grammatical',sentence:'那本书是朋友介绍给我的。',scene:'books'},
-{id:'F20',context:"我昨天在图书馆看到了一本很有意思的书。",condition:'ungrammatical',sentence:'那本书朋友是介绍我的给。',scene:'books'},
+{id:'F20',context:"我昨天在图书馆看到了一本很有意思的书。",condition:'ungrammatical',sentence:'那本书是朋友介绍我的。',scene:'books'},
 {id:'F21',context:"小刘以前不会做饭，现在已经学会了。",condition:'grammatical',sentence:'小刘现在会做几种中国菜了。',scene:'cooking'},
 {id:'F22',context:"小刘以前不会做饭，现在已经学会了。",condition:'ungrammatical',sentence:'小刘现在会了做几种中国菜。',scene:'cooking'},
 {id:'F23',context:"我找了很长时间，最后终于找到了手机。",condition:'grammatical',sentence:'我的手机原来在书包里。',scene:'phone'},
-{id:'F24',context:"我找了很长时间，最后终于找到了手机。",condition:'ungrammatical',sentence:'我的手机在原来书包里。',scene:'phone'}].map(x=>({...x,variable:null,lead_in:x.lead_in||'在这个情境中，有人这样说：'}));
+{id:'F24',context:"我找了很长时间，最后终于找到了手机。",condition:'ungrammatical',sentence:'我的手机原来书包里。',scene:'phone'}].map(x=>({...x,variable:null,lead_in:x.lead_in||'在这个情境中，有人这样说：'}));
 const ajtItems=makeAjtOrder(ajtTargets,ajtFillers);
 const scale=['1<br><span class="small-note">非常不自然</span>','2<br><span class="small-note">比较不自然</span>','3<br><span class="small-note">介于自然和不自然之间</span>','4<br><span class="small-note">比较自然</span>','5<br><span class="small-note">非常自然</span>'];
 
 // ---------- welcome, branch, demographics, cloze ----------
-timeline.push({type:jsPsychPreload,images:Object.values(IMAGE_PATHS)});
+timeline.push({type:jsPsychPreload,images:[...Object.values(IMAGE_PATHS),'assets/example.png','assets/practice.png']});
 timeline.push({type:jsPsychHtmlButtonResponse,stimulus:`
 <h1>欢迎参加汉语研究实验</h1>
 <div class="info-box"><p><b>研究说明：</b>本研究考察汉语句子的理解与表达。您需要完成一项汉语水平测试和两项语言任务。</p>
@@ -197,12 +213,12 @@ l2pre.push({type:jsPsychSurveyHtmlForm,preamble:'<h3>第一部分：个人基本
 <p><b>6. 汉语学习时间：</b> 大约 <input type="number" name="learning_months" min="1" max="600" required style="width:100px"> 个月</p>
 <p><b>7. 是否有在中国学习/生活经历？</b><br><label><input type="radio" name="china_exp" value="yes" required onclick="const c=document.getElementById('stm');const m=document.getElementById('study_months');c.style.display='block';m.required=true;"> 有</label>　<label><input type="radio" name="china_exp" value="no" onclick="const c=document.getElementById('stm');const m=document.getElementById('study_months');c.style.display='none';m.required=false;m.value='';"> 没有</label></p>
 <div id="stm" style="display:none"><b>在华累计时间：</b><input type="number" id="study_months" name="study_time_months" min="1" style="width:100px"> 个月</div></div>`,button_label:'提交并继续',data:{task_type:'demographics_L2'}});
-l2pre.push({type:jsPsychHtmlButtonResponse,stimulus:'<h3>第二部分：汉语完形填空</h3><div class="info-box">共有三篇短文。每个空格只填写一个汉字；不会写汉字时，可以填写这个汉字的拼音。不要填写完整词语或句子。实在想不出时可以空着。</div>',choices:['开始填空']});
+l2pre.push({type:jsPsychHtmlButtonResponse,stimulus:'<h3>第二部分：汉语完形填空</h3><div class="info-box">共有三篇短文。每个空格只填写一个汉字；不会写汉字时，可以填写这个汉字的拼音。不要填写完整词语或句子。个别空格实在想不出时可以空着，但请尽量完成每篇短文。</div>',choices:['开始填空']});
 function B(n){return `<input type="text" name="cloze_b${n}" maxlength="8" autocomplete="off" style="width:48px;text-align:center;padding:4px 2px;margin:0 1px;font-family:KaiTi;font-size:18px"><sub style="color:#0284c7;font-size:12px">${n}</sub>`}
 const cp=[
-{id:'cloze_p1',title:'短文一',html:`<div class="cloze-passage">王先生的家在北京，他家里有六口人。他们是爸爸，妈${B(1)}，一个哥哥，一个${B(2)}弟，一个妹妹，还${B(3)}他。他的哥哥已${B(4)}结婚了，没有跟${B(5)}母住在一起。王${B(6)}生还没结婚，可${B(7)}他也没跟父母${B(8)}在一起。现在他${B(9)}美国读书。只有他的弟弟和父母住在一起。</div>`},
-{id:'cloze_p2',title:'短文二',html:`<div class="cloze-passage">近年来，丁克家庭越来越多，它的意思是夫妻二人都有收入，但是没有孩子。大部分丁克家${B(10)}不要孩子的主${B(11)}原因是不想让${B(12)}己的生活被孩${B(13)}打扰。他们大都${B(14)}现在的夫妻二${B(15)}世界很满意，不${B(16)}为孩子花费太${B(17)}的时间和精力。${B(18)}外，不想让孩子${B(19)}苦也是部分人${B(20)}择做丁克家庭${B(21)}原因。要不要做${B(22)}克家庭，每个人${B(23)}然都有选择的${B(24)}由。而我觉得，任${B(25)}事都有两面性，${B(26)}能只看到养育${B(27)}子的不便之处，${B(28)}看不到这样做${B(29)}好处。养育孩子${B(30)}然辛苦，但苦中${B(31)}乐，孩子也会给${B(32)}母带来很多快${B(33)}。此外，父母老了${B(34)}时候，孩子还能${B(35)}顾父母。</div>`},
-{id:'cloze_p3',title:'短文三',html:`<div class="cloze-passage">在第八届中国艺术节举办期间，东道主湖北省端出一道文化盛宴——永久免费开放湖北省博物馆。自免费之后，游${B(36)}人数大大超出${B(37)}理者预期的参${B(38)}人数，而由此带${B(39)}的一系列问题，${B(40)}发了人们的热${B(41)}和深思。收费时，${B(42)}众止步，博物馆${B(43)}可罗雀；免费后，${B(44)}物馆爆满，这反${B(45)}了中国经济社${B(46)}发展对文化建${B(47)}的新要求，反映${B(48)}物质生活改善${B(49)}人民群众对文${B(50)}服务的新期待。${B(51)}年来，随着中国${B(52)}济社会的发展，${B(53)}化事业也有了${B(54)}足的进步。可令${B(55)}担忧的是，由于${B(56)}共文化服务体${B(57)}不健全、文化基${B(58)}设施落后、文化${B(59)}务能力偏低等${B(60)}因，许多群众还${B(61)}以享受到贴近${B(62)}活的文化服务${B(63)}式。更严重的是，${B(64)}些文化事业单${B(65)}在利益的驱使${B(66)}，不断提高门票${B(67)}格，将许多群众${B(68)}其是低收入者${B(69)}在门外，使本已${B(70)}乏的公共文化${B(71)}施再度缩水。</div>`}];
+{id:'cloze_p1',title:'短文一',min_required:2,html:`<div class="cloze-passage">王先生的家在北京，他家里有六口人。他们是爸爸，妈${B(1)}，一个哥哥，一个${B(2)}弟，一个妹妹，还${B(3)}他。他的哥哥已${B(4)}结婚了，没有跟${B(5)}母住在一起。王${B(6)}生还没结婚，可${B(7)}他也没跟父母${B(8)}在一起。现在他${B(9)}美国读书。只有他的弟弟和父母住在一起。</div>`},
+{id:'cloze_p2',title:'短文二',min_required:6,html:`<div class="cloze-passage">近年来，丁克家庭越来越多，它的意思是夫妻二人都有收入，但是没有孩子。大部分丁克家${B(10)}不要孩子的主${B(11)}原因是不想让${B(12)}己的生活被孩${B(13)}打扰。他们大都${B(14)}现在的夫妻二${B(15)}世界很满意，不${B(16)}为孩子花费太${B(17)}的时间和精力。${B(18)}外，不想让孩子${B(19)}苦也是部分人${B(20)}择做丁克家庭${B(21)}原因。要不要做${B(22)}克家庭，每个人${B(23)}然都有选择的${B(24)}由。而我觉得，任${B(25)}事都有两面性，${B(26)}能只看到养育${B(27)}子的不便之处，${B(28)}看不到这样做${B(29)}好处。养育孩子${B(30)}然辛苦，但苦中${B(31)}乐，孩子也会给${B(32)}母带来很多快${B(33)}。此外，父母老了${B(34)}时候，孩子还能${B(35)}顾父母。</div>`},
+{id:'cloze_p3',title:'短文三',min_required:8,html:`<div class="cloze-passage">在第八届中国艺术节举办期间，东道主湖北省端出一道文化盛宴——永久免费开放湖北省博物馆。自免费之后，游${B(36)}人数大大超出${B(37)}理者预期的参${B(38)}人数，而由此带${B(39)}的一系列问题，${B(40)}发了人们的热${B(41)}和深思。收费时，${B(42)}众止步，博物馆${B(43)}可罗雀；免费后，${B(44)}物馆爆满，这反${B(45)}了中国经济社${B(46)}发展对文化建${B(47)}的新要求，反映${B(48)}物质生活改善${B(49)}人民群众对文${B(50)}服务的新期待。${B(51)}年来，随着中国${B(52)}济社会的发展，${B(53)}化事业也有了${B(54)}足的进步。可令${B(55)}担忧的是，由于${B(56)}共文化服务体${B(57)}不健全、文化基${B(58)}设施落后、文化${B(59)}务能力偏低等${B(60)}因，许多群众还${B(61)}以享受到贴近${B(62)}活的文化服务${B(63)}式。更严重的是，${B(64)}些文化事业单${B(65)}在利益的驱使${B(66)}，不断提高门票${B(67)}格，将许多群众${B(68)}其是低收入者${B(69)}在门外，使本已${B(70)}乏的公共文化${B(71)}施再度缩水。</div>`}];
 cp.forEach(p=>l2pre.push({
  type:jsPsychSurveyHtmlForm,
  preamble:`<h3>${p.title}</h3>`,
@@ -214,9 +230,10 @@ cp.forEach(p=>l2pre.push({
    if(!form) return;
    form.addEventListener('submit',function(ev){
      const vals=[...form.querySelectorAll('input[type="text"]')].map(x=>x.value.trim());
-     if(vals.length && vals.every(v=>v==='')){
-       const ok=window.confirm('这一篇目前还没有填写任何答案。请尽量填写您会的空格。确实无法作答时，也可以继续。\n\n仍要提交空白短文吗？');
-       if(!ok){ev.preventDefault();ev.stopImmediatePropagation();}
+     const answered=vals.filter(Boolean).length;
+     if(answered<p.min_required){
+       ev.preventDefault();ev.stopImmediatePropagation();
+       alert(`请尽量完成这篇短文。当前已填写 ${answered} 个空格，至少需要填写 ${p.min_required} 个空格后才能继续。不会写汉字时，可以填写拼音。`);
      }
    },true);
  },
@@ -226,6 +243,7 @@ cp.forEach(p=>l2pre.push({
    d.cloze_answered_count=vals.filter(Boolean).length;
    d.cloze_blank_count=vals.filter(v=>!v).length;
    d.cloze_completion_rate=vals.length?d.cloze_answered_count/vals.length:0;
+   d.cloze_min_required=p.min_required;
  }
 }));
 timeline.push({timeline:l2pre,conditional_function:()=>{let x=jsPsych.data.get().filter({trial_tag:'native_check'}).last(1).values()[0];return x&&!x.is_native}});
@@ -237,10 +255,10 @@ timeline.push({timeline:nativePre,conditional_function:()=>{let x=jsPsych.data.g
 // ---------- task builders ----------
 function eptTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人或动物。</p><p><strong>请使用括号里的动词，用一个完整的句子说明你（A）看到B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须使用括号里的动词，并写成一个完整、自然的句子，不要只写一个词或短语；<br>2. 不会写某个汉字时，可以使用拼音代替；<br>3. 请根据图片中A的位置和B的变化，写出你认为最自然、最准确的句子。</p><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
- t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="assets/practice.png" onclick="this.classList.toggle('zoomed')" alt="练习图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer" name="practice" required minlength="2" placeholder="请在这里输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:'assets/practice.png'}});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人或动物。</p><p><strong>请使用括号里的动词，用一个完整的句子说明你（A）看到B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须使用括号里的动词，并写成一个完整、自然的句子，不要只写一个词或短语；<br>2. 不会写某个汉字时，可以使用拼音代替；<br>3. 请根据图片中A的位置和B的变化，写出你认为最自然、最准确的句子。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="assets/example.png" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:8px 0 0;">可以回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p class="small-note" style="margin-bottom:0;">请描述B发生的变化，不要只描述右图中的状态。</p></div><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
+ t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="assets/practice.png" onclick="this.classList.toggle('zoomed')" alt="练习图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer" name="practice" required minlength="4" autocomplete="off" placeholder="请在这里输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:'assets/practice.png'},on_load:()=>attachEptValidation('practice','睡觉',true),on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.used_required_verb=answerUsesVerb(a,'睡觉');}});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请根据左右两幅图，使用括号里的动词，写一个完整、自然的句子。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
- eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div><img class="ept-image" src="${it.img}" onclick="this.classList.toggle('zoomed')" alt="实验图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：${it.verb}）</span></div></div>`,html:`<input class="ept-answer" name="ept_${it.id}" required minlength="2" autocomplete="off" placeholder="请在这里输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1}}));
+ eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div><img class="ept-image" src="${it.img}" onclick="this.classList.toggle('zoomed')" alt="实验图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：${it.verb}）</span></div></div>`,html:`<input class="ept-answer" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请在这里输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1},on_load:()=>attachEptValidation(`ept_${it.id}`,it.verb),on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.used_required_verb=answerUsesVerb(a,it.verb);}}));
  return t;
 }
 function ajtTimeline(){
@@ -255,8 +273,7 @@ function ajtTimeline(){
 const EPT=eptTimeline(),AJT=ajtTimeline(); const first=task_order==='EPT_AJT'?EPT:AJT, second=task_order==='EPT_AJT'?AJT:EPT;
 timeline.push(...first);timeline.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="break-card"><h3>休息一下</h3><p>第一项正式任务已经完成。请休息1—3分钟，准备好后再继续。</p></div>',choices:['开始下一项任务']});timeline.push(...second);
 
-timeline.push({type:jsPsychSurveyHtmlForm,preamble:'<h3>预实验反馈（可选）</h3><p>您的反馈将帮助我们改进正式实验。</p>',html:`<div style="text-align:left;max-width:700px;margin:auto;line-height:1.8"><p>1. 哪些图片看不懂、方向不清楚，或容易产生不同理解？</p><textarea name="image_feedback" rows="3" style="width:100%"></textarea><p>2. 哪些词或句子不容易理解？</p><textarea name="language_feedback" rows="3" style="width:100%"></textarea><p>3. 您觉得哪一部分最难？还有其他建议吗？</p><textarea name="general_feedback" rows="3" style="width:100%"></textarea></div>`,button_label:'提交反馈',data:{task_type:'pilot_feedback'}});
-timeline.push({type:jsPsychCallFunction,func:()=>jsPsych.data.addProperties({total_duration_seconds:Math.round(jsPsych.getTotalTime()/1000),page_blur_count})});
+timeline.push({type:jsPsychCallFunction,func:()=>{const c=jsPsych.data.get().filter({task_type:'ClozCHI'}).values();const answered=c.reduce((n,x)=>n+(x.cloze_answered_count||0),0);jsPsych.data.addProperties({total_duration_seconds:Math.round(jsPsych.getTotalTime()/1000),page_blur_count,cloze_total_answered:answered,cloze_total_blank:c.length?71-answered:null,cloze_total_completion_rate:c.length?answered/71:null});}});
 timeline.push({type:jsPsychPipe,action:'save',experiment_id:DATA_PIPE_EXPERIMENT_ID,filename:`${subject_id}.csv`,data_string:()=>jsPsych.data.get().csv(),on_finish:()=>{try{localStorage.removeItem('directional_exp_backup')}catch(e){}}});
 timeline.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>实验结束</h3><p style="font-size:18px;color:#16a34a;font-weight:700">数据已成功提交，感谢您的参与！</p><div class="info-box" style="text-align:center"><p>完成码</p><p style="font-size:30px;font-weight:800;color:#0369a1">${completion_code}</p></div><p>请截图保存完成码，并发送至主试邮箱：<strong>${RESEARCHER_EMAIL}</strong>。</p>`,choices:[]});
 jsPsych.run(timeline);
