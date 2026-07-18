@@ -39,7 +39,7 @@ const DATA_PIPE_EXPERIMENT_ID='IRsUduBNRMIB';
 const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
-jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v14_2026-07-15',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
+jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v16_2026-07-18',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1": "assets/ept_01.png", "2": "assets/ept_02.png", "3": "assets/ept_03.png", "4": "assets/ept_04.png", "5": "assets/ept_05.png", "6": "assets/ept_06.png", "7": "assets/ept_07.png", "8": "assets/ept_08.png", "9": "assets/ept_09.png", "10": "assets/ept_10.png", "11": "assets/ept_11.png", "12": "assets/ept_12.png", "13": "assets/ept_13.png", "14": "assets/ept_14.png", "15": "assets/ept_15.png", "16": "assets/ept_16.png", "17": "assets/ept_17.png", "18": "assets/ept_18.png", "19": "assets/ept_19.png", "20": "assets/ept_20.png", "21": "assets/ept_21.png", "22": "assets/ept_22.png", "23": "assets/ept_23.png", "24": "assets/ept_24.png", "25": "assets/ept_25.png", "26": "assets/ept_26.png", "27": "assets/ept_27.png", "28": "assets/ept_28.png"};
@@ -273,8 +273,182 @@ function ajtTimeline(){
 const EPT=eptTimeline(),AJT=ajtTimeline(); const first=task_order==='EPT_AJT'?EPT:AJT, second=task_order==='EPT_AJT'?AJT:EPT;
 timeline.push(...first);timeline.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="break-card"><h3>休息一下</h3><p>第一项正式任务已经完成。请休息1—3分钟，准备好后再继续。</p></div>',choices:['开始下一项任务']});timeline.push(...second);
 
-timeline.push({type:jsPsychCallFunction,func:()=>{const c=jsPsych.data.get().filter({task_type:'ClozCHI'}).values();const answered=c.reduce((n,x)=>n+(x.cloze_answered_count||0),0);jsPsych.data.addProperties({total_duration_seconds:Math.round(jsPsych.getTotalTime()/1000),page_blur_count,cloze_total_answered:answered,cloze_total_blank:c.length?71-answered:null,cloze_total_completion_rate:c.length?answered/71:null});}});
-timeline.push({type:jsPsychPipe,action:'save',experiment_id:DATA_PIPE_EXPERIMENT_ID,filename:`${subject_id}.csv`,data_string:()=>jsPsych.data.get().csv(),on_finish:()=>{try{localStorage.removeItem('directional_exp_backup')}catch(e){}}});
-timeline.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>实验结束</h3><p style="font-size:18px;color:#16a34a;font-weight:700">数据已成功提交，感谢您的参与！</p><div class="info-box" style="text-align:center"><p>完成码</p><p style="font-size:30px;font-weight:800;color:#0369a1">${completion_code}</p></div><p>请截图保存完成码，并发送至主试邮箱：<strong>${RESEARCHER_EMAIL}</strong>。</p>`,choices:[]});
+// ---------- 记录总时长、完整性检查与可靠上传 ----------
+timeline.push({
+ type:jsPsychCallFunction,
+ func:()=>{
+   const c=jsPsych.data.get().filter({task_type:'ClozCHI'}).values();
+   const answered=c.reduce((n,x)=>n+(x.cloze_answered_count||0),0);
+   jsPsych.data.addProperties({
+     total_duration_seconds:Math.round(jsPsych.getTotalTime()/1000),
+     page_blur_count,
+     cloze_total_answered:answered,
+     cloze_total_blank:c.length?71-answered:null,
+     cloze_total_completion_rate:c.length?answered/71:null,
+     upload_filename:`${subject_id}.csv`,
+     upload_started_at:new Date().toISOString()
+   });
+ }
+});
+
+function validateExperimentData(){
+  const data=jsPsych.data.get();
+  const groupRow=data.filter({trial_tag:'native_check'}).last(1).values()[0];
+  const participantGroup=groupRow&&groupRow.is_native===true?'native':'L2';
+  const counts={
+    consent:data.filter({task_type:'consent'}).count(),
+    native_check:data.filter({trial_tag:'native_check'}).count(),
+    demographics_l2:data.filter({task_type:'demographics_L2'}).count(),
+    demographics_native:data.filter({task_type:'demographics_native'}).count(),
+    cloze:data.filter({task_type:'ClozCHI'}).count(),
+    ept:data.filter({task_type:'EPT'}).count(),
+    ajt:data.filter({task_type:'AJT'}).count()
+  };
+  const problems=[];
+  if(counts.consent!==1) problems.push(`知情同意记录异常（${counts.consent}/1）`);
+  if(counts.native_check!==1) problems.push(`母语筛查记录异常（${counts.native_check}/1）`);
+  if(counts.ept!==eptItems.length) problems.push(`图片描述题数异常（${counts.ept}/${eptItems.length}）`);
+  if(counts.ajt!==ajtItems.length) problems.push(`自然度判断题数异常（${counts.ajt}/${ajtItems.length}）`);
+  if(participantGroup==='L2'){
+    if(counts.demographics_l2!==1) problems.push(`二语者人口信息异常（${counts.demographics_l2}/1）`);
+    if(counts.cloze!==cp.length) problems.push(`完形填空篇数异常（${counts.cloze}/${cp.length}）`);
+  }else{
+    if(counts.demographics_native!==1) problems.push(`母语者人口信息异常（${counts.demographics_native}/1）`);
+    if(counts.cloze!==0) problems.push(`母语者不应出现完形填空记录（${counts.cloze}/0）`);
+  }
+  const eptRows=data.filter({task_type:'EPT'}).values();
+  const missingEpt=eptRows.filter(row=>{
+    const response=row.response||{};
+    return !Object.values(response).some(v=>(v??'').toString().trim().length>0);
+  }).length;
+  if(missingEpt>0) problems.push(`图片描述任务有 ${missingEpt} 题缺少作答`);
+  const ajtRows=data.filter({task_type:'AJT'}).values();
+  const missingAjt=ajtRows.filter(row=>{
+    const response=row.response||{};
+    return !Object.values(response).some(v=>v!==null&&v!==undefined&&v!=='');
+  }).length;
+  if(missingAjt>0) problems.push(`自然度判断任务有 ${missingAjt} 题缺少评分`);
+  return {valid:problems.length===0,participantGroup,counts,problems};
+}
+
+function downloadLocalBackup(){
+  const blob=new Blob(['\ufeff'+jsPsych.data.get().csv()],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`${subject_id}_backup.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function uploadToDataPipe(){
+  const response=await fetch('https://pipe.jspsych.org/api/data/',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      experimentID:DATA_PIPE_EXPERIMENT_ID,
+      filename:`${subject_id}.csv`,
+      data:jsPsych.data.get().csv()
+    })
+  });
+  let result={};
+  try{result=await response.json();}catch(e){}
+  if(response.status===202) return {message:result.message||'Accepted',accepted:true,http_status:202};
+  if(response.ok&&(result.message==='Success'||!result.error)) return {...result,http_status:response.status};
+  if(result.error==='OSF_FILE_EXISTS') return {message:'Success',recoveredFrom:'OSF_FILE_EXISTS',http_status:response.status};
+  const error=new Error(result.message||`上传失败（HTTP ${response.status}）`);
+  error.code=result.error||`HTTP_${response.status}`;
+  error.httpStatus=response.status;
+  throw error;
+}
+
+timeline.push({
+ type:jsPsychHtmlButtonResponse,
+ stimulus:`
+   <h3 style="border:none;">正在保存数据</h3>
+   <div id="upload-status" style="font-size:18px;line-height:1.8;max-width:680px;margin:auto;">
+     <p>正在检查并上传您的作答数据，请不要关闭、返回或刷新页面。</p>
+     <p style="color:#64748b;font-size:15px;">网络较慢时可能需要几十秒。</p>
+   </div>
+ `,
+ choices:[],
+ data:{task_type:'DataUpload'},
+ on_load:function(){
+   const status=document.getElementById('upload-status');
+   const validation=validateExperimentData();
+   jsPsych.data.addProperties({
+     data_validation_passed:validation.valid,
+     data_validation_checked_at:new Date().toISOString()
+   });
+   if(!validation.valid){
+     status.innerHTML=`
+       <div class="warn-box"><strong>数据完整性检查未通过。</strong><br>${validation.problems.join('<br>')}</div>
+       <p>请不要关闭页面，并联系主试。您也可以先下载本地备份。</p>
+       <button id="backup-btn" class="jspsych-btn">下载本地备份</button>
+       <p class="small-note">被试编号：${subject_id}</p>
+     `;
+     document.getElementById('backup-btn').onclick=downloadLocalBackup;
+     return;
+   }
+   let attempts=0;
+   const maxAttempts=3;
+   const tryUpload=async()=>{
+     attempts+=1;
+     status.innerHTML=`
+       <p><strong>正在上传数据（第 ${attempts} 次，共 ${maxAttempts} 次）……</strong></p>
+       <p style="color:#64748b;font-size:15px;">请保持页面打开。</p>
+     `;
+     try{
+       const result=await uploadToDataPipe();
+       try{localStorage.removeItem('directional_exp_backup')}catch(e){}
+       jsPsych.finishTrial({
+         upload_success:true,
+         upload_attempts:attempts,
+         upload_result:result.message||'',
+         upload_http_status:result.http_status||'',
+         upload_accepted_async:result.accepted===true,
+         upload_recovered_from_existing_file:result.recoveredFrom||'',
+         upload_completed_at:new Date().toISOString()
+       });
+     }catch(error){
+       if(attempts<maxAttempts){
+         status.innerHTML=`
+           <p style="color:#b45309;"><strong>本次上传未成功，系统将在5秒后自动重试。</strong></p>
+           <p style="color:#64748b;font-size:14px;">错误代码：${error.code||'UNKNOWN_ERROR'}</p>
+         `;
+         setTimeout(tryUpload,5000);
+       }else{
+         status.innerHTML=`
+           <div class="warn-box"><strong>数据暂时未能上传成功。</strong><br>错误代码：${error.code||'UNKNOWN_ERROR'}</div>
+           <p>请不要关闭页面。您可以重新上传；若仍失败，请下载本地备份并发送给主试。</p>
+           <button id="retry-btn" class="jspsych-btn">重新上传</button>
+           <button id="backup-btn" class="jspsych-btn" style="margin-left:12px;background:#475569;">下载本地备份</button>
+           <p style="margin-top:18px;color:#64748b;font-size:14px;">被试编号：${subject_id}</p>
+         `;
+         document.getElementById('retry-btn').onclick=()=>{attempts=0;tryUpload();};
+         document.getElementById('backup-btn').onclick=downloadLocalBackup;
+       }
+     }
+   };
+   tryUpload();
+ }
+});
+
+timeline.push({
+ type:jsPsychHtmlButtonResponse,
+ stimulus:`
+   <h3>实验结束</h3>
+   <p style="font-size:18px;color:#16a34a;font-weight:700">服务器已接收您的作答数据，感谢您的参与！</p>
+   <div class="info-box" style="text-align:center">
+     <p>完成码</p>
+     <p style="font-size:30px;font-weight:800;color:#0369a1">${completion_code}</p>
+   </div>
+   <p>请截图保存完成码，并发送至主试邮箱：<strong>${RESEARCHER_EMAIL}</strong>。</p>
+   <p style="color:#94a3b8;font-size:14px;">现在可以安全关闭浏览器窗口。</p>
+ `,
+ choices:[]
+});
 jsPsych.run(timeline);
 </script></body></html>
