@@ -39,7 +39,7 @@ const DATA_PIPE_EXPERIMENT_ID='IRsUduBNRMIB';
 const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
-jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v16_2026-07-18',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
+jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'pilot_v17_2026-07-19',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1": "assets/ept_01.png", "2": "assets/ept_02.png", "3": "assets/ept_03.png", "4": "assets/ept_04.png", "5": "assets/ept_05.png", "6": "assets/ept_06.png", "7": "assets/ept_07.png", "8": "assets/ept_08.png", "9": "assets/ept_09.png", "10": "assets/ept_10.png", "11": "assets/ept_11.png", "12": "assets/ept_12.png", "13": "assets/ept_13.png", "14": "assets/ept_14.png", "15": "assets/ept_15.png", "16": "assets/ept_16.png", "17": "assets/ept_17.png", "18": "assets/ept_18.png", "19": "assets/ept_19.png", "20": "assets/ept_20.png", "21": "assets/ept_21.png", "22": "assets/ept_22.png", "23": "assets/ept_23.png", "24": "assets/ept_24.png", "25": "assets/ept_25.png", "26": "assets/ept_26.png", "27": "assets/ept_27.png", "28": "assets/ept_28.png"};
@@ -48,7 +48,7 @@ const IMAGE_PATHS={"1": "assets/ept_01.png", "2": "assets/ept_02.png", "3": "ass
 function shuffle(a){return jsPsych.randomization.shuffle(a.slice())}
 const VERB_PINYIN={
  '睡觉':['shuijiao'],'跑':['pao'],'跳':['tiao'],'游':['you'],'骑':['qi'],'开':['kai'],'走':['zou'],'飞':['fei'],'划':['hua'],'钻':['zuan'],'爬':['pa'],
- '写':['xie'],'拍':['pai'],'拉':['la'],'唱':['chang'],'跳舞':['tiaowu'],'借':['jie'],'弹':['tan'],'喝':['he'],'递':['di'],'扔':['reng'],'投':['tou']
+ '写':['xie'],'拍照':['paizhao'],'拉':['la'],'唱歌':['changge'],'跳舞':['tiaowu'],'打电话':['dadianhua'],'弹':['tan'],'喝':['he'],'递':['di'],'扔':['reng'],'投':['tou'],'冲':['chong']
 };
 function normalizeAnswer(x){return (x||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z\u4e00-\u9fff]/g,'');}
 function answerUsesVerb(answer,verb){const n=normalizeAnswer(answer);if(n.includes(verb))return true;return (VERB_PINYIN[verb]||[]).some(py=>n.includes(py));}
@@ -115,17 +115,17 @@ const eptItemsRaw=[
 {id:'EPT10',type:'target',img:IMAGE_PATHS[10],scene:'birdcage',family:'place-qu',goal:'飞出笼子去',verb:'飞'},
 {id:'EPT11',type:'target',img:IMAGE_PATHS[11],scene:'stairs',family:'place-qu',goal:'跑上二楼去',verb:'跑'},
 {id:'EPT12',type:'target',img:IMAGE_PATHS[12],scene:'cave',family:'place-lai',goal:'划出山洞来',verb:'划'},
-{id:'EPT13',type:'target',img:IMAGE_PATHS[13],scene:'library',family:'place-lai',goal:'跑出图书馆来',verb:'跑'},
+{id:'EPT13',type:'target',img:IMAGE_PATHS[13],scene:'library',family:'place-lai',goal:'冲出图书馆来',verb:'冲'},
 {id:'EPT14',type:'target',img:IMAGE_PATHS[14],scene:'tent',family:'place-qu',goal:'钻进帐篷去',verb:'钻'},
 {id:'EPT15',type:'target',img:IMAGE_PATHS[15],scene:'stage',family:'place-qu',goal:'跳下舞台去',verb:'跳'},
 {id:'EPT16',type:'target',img:IMAGE_PATHS[16],scene:'platform',family:'place-lai',goal:'爬上观景台来',verb:'爬'},
 {id:'EPTF01',type:'filler',img:IMAGE_PATHS[17],scene:'meeting',verb:'写'},
-{id:'EPTF02',type:'filler',img:IMAGE_PATHS[18],scene:'plaza',verb:'拍'},
+{id:'EPTF02',type:'filler',img:IMAGE_PATHS[18],scene:'plaza',verb:'拍照'},
 {id:'EPTF03',type:'filler',img:IMAGE_PATHS[19],scene:'treadmill',verb:'跑'},
 {id:'EPTF04',type:'filler',img:IMAGE_PATHS[20],scene:'curtain',event:'open_curtain',verb:'拉'},
-{id:'EPTF05',type:'filler',img:IMAGE_PATHS[21],scene:'stage',verb:'唱'},
+{id:'EPTF05',type:'filler',img:IMAGE_PATHS[21],scene:'stage',verb:'唱歌'},
 {id:'EPTF06',type:'filler',img:IMAGE_PATHS[22],scene:'stage',verb:'跳舞'},
-{id:'EPTF07',type:'filler',img:IMAGE_PATHS[23],scene:'library',verb:'借'},
+{id:'EPTF07',type:'filler',img:IMAGE_PATHS[23],scene:'library_phone',verb:'打电话'},
 {id:'EPTF08',type:'filler',img:IMAGE_PATHS[24],scene:'piano',verb:'弹'},
 {id:'EPTF09',type:'filler',img:IMAGE_PATHS[25],scene:'dining',verb:'喝'},
 {id:'EPTF10',type:'filler',img:IMAGE_PATHS[26],scene:'park_bench',event:'give_book',verb:'递'},
