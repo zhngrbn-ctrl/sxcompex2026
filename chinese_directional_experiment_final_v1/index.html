@@ -23,7 +23,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;box-sh
 function getAgeOptions(){let s='<option value="" disabled selected>请选择</option>';for(let i=16;i<=60;i++)s+=`<option value="${i}">${i}岁</option>`;return s;}
 const jsPsych=initJsPsych({show_progress_bar:true,message_progress_bar:'实验总进度',on_data_update:(d)=>{try{localStorage.setItem('directional_exp_backup',jsPsych.data.get().json())}catch(e){}}});
 const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP-'+Math.floor(Math.random()*900000+100000);
-const urlCell=new URLSearchParams(window.location.search).get('cell');
+const urlParams=new URLSearchParams(window.location.search);
+const urlCell=urlParams.get('cell');
+const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
+const STUDY_VERSION='final_v4_2026-07-30';
+const ASSET_VERSION='final-v4-20260730';
+const versionedAsset=path=>`${path}?v=${ASSET_VERSION}`;
 const cellMap={
   '1':{task_order:'EPT_AJT',ajt_list:'A'},
   '2':{task_order:'EPT_AJT',ajt_list:'B'},
@@ -38,10 +43,14 @@ const DATA_PIPE_EXPERIMENT_ID='IRsUduBNRMIB';
 const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
-jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,study_version:'final_v3_2026-07-30',datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
+const upload_filename=`${experiment_phase}_${subject_id}.csv`;
+jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,experiment_phase,study_version:STUDY_VERSION,datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1":"assets/ept_01.png","2":"assets/ept_02.png","3":"assets/ept_03.png","4":"assets/ept_04.png","5":"assets/ept_05.png","6":"assets/ept_06.png","7":"assets/ept_07.png","8":"assets/ept_08.png","9":"assets/ept_09.png","10":"assets/ept_10_跑出教室去_v1.png","11":"assets/ept_11_跑上二楼去_v7_B标签靠近人物.png","12":"assets/ept_12_划出山洞来.png","13":"assets/ept_13_冲出图书馆来.png","14":"assets/ept_14_钻进帐篷去.png","15":"assets/ept_15_跳下舞台去.png","16":"assets/ept_16_爬上观景台来.png","17":"assets/ept_17_写会议要点.png","18":"assets/ept_18_拍照.png","19":"assets/ept_19_跑步.png","20":"assets/ept_20.png","21":"assets/ept_21.png","22":"assets/ept_22.png","23":"assets/ept_23.png","24":"assets/ept_24.png","25":"assets/ept_25.png","26":"assets/ept_26.png","27":"assets/ept_27.png","28":"assets/ept_28.png"};
+Object.keys(IMAGE_PATHS).forEach(key=>{IMAGE_PATHS[key]=versionedAsset(IMAGE_PATHS[key]);});
+const EXAMPLE_IMAGE=versionedAsset('assets/example.png');
+const PRACTICE_IMAGE=versionedAsset('assets/practice.png');
 
 // ---------- utilities ----------
 function shuffle(a){return jsPsych.randomization.shuffle(a.slice())}
@@ -191,7 +200,7 @@ const ajtItems=makeAjtOrder(ajtTargets,ajtFillers);
 const scale=['1<br><span class="small-note">非常不自然</span>','2<br><span class="small-note">比较不自然</span>','3<br><span class="small-note">介于自然和不自然之间</span>','4<br><span class="small-note">比较自然</span>','5<br><span class="small-note">非常自然</span>'];
 
 // ---------- welcome, branch, demographics, cloze ----------
-timeline.push({type:jsPsychPreload,images:[...Object.values(IMAGE_PATHS),'assets/example.png','assets/practice.png']});
+timeline.push({type:jsPsychPreload,images:[...Object.values(IMAGE_PATHS),EXAMPLE_IMAGE,PRACTICE_IMAGE]});
 timeline.push({type:jsPsychHtmlButtonResponse,stimulus:`
 <h1>欢迎参加汉语研究实验</h1>
 <div class="info-box"><p><b>研究说明：</b>本研究考察汉语句子的理解与表达。您需要完成一项汉语水平测试和两项语言任务。</p>
@@ -254,8 +263,8 @@ timeline.push({timeline:nativePre,conditional_function:()=>{let x=jsPsych.data.g
 // ---------- task builders ----------
 function eptTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p><strong>请使用括号里的动词，用一个完整的句子说明你（A）看到B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须使用括号里的动词，并写成一个完整、自然的句子，不要只写一个词或短语；<br>2. 不会写某个汉字时，可以使用拼音代替；<br>3. 请根据图片中A的位置和B的变化，写出你认为最自然、最准确的句子。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="assets/example.png" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:8px 0 0;">可以回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p class="small-note" style="margin-bottom:0;">请描述B发生的变化，不要只描述右图中的状态。</p></div><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
- t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="assets/practice.png" onclick="this.classList.toggle('zoomed')" alt="练习图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer" name="practice" required minlength="4" autocomplete="off" placeholder="请在这里输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:'assets/practice.png'},on_load:()=>attachEptValidation('practice','睡觉',true),on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.used_required_verb=answerUsesVerb(a,'睡觉');}});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p><strong>请使用括号里的动词，用一个完整的句子说明你（A）看到B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须使用括号里的动词，并写成一个完整、自然的句子，不要只写一个词或短语；<br>2. 不会写某个汉字时，可以使用拼音代替；<br>3. 请根据图片中A的位置和B的变化，写出你认为最自然、最准确的句子。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="${EXAMPLE_IMAGE}" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:8px 0 0;">可以回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p class="small-note" style="margin-bottom:0;">请描述B发生的变化，不要只描述右图中的状态。</p></div><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
+ t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="${PRACTICE_IMAGE}" onclick="this.classList.toggle('zoomed')" alt="练习图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer" name="practice" required minlength="4" autocomplete="off" placeholder="请在这里输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE},on_load:()=>attachEptValidation('practice','睡觉',true),on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.used_required_verb=answerUsesVerb(a,'睡觉');}});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请根据左右两幅图，使用括号里的动词，写一个完整、自然的句子。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
  eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div><img class="ept-image" src="${it.img}" onclick="this.classList.toggle('zoomed')" alt="实验图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：${it.verb}）</span></div></div>`,html:`<input class="ept-answer" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请在这里输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1},on_load:()=>attachEptValidation(`ept_${it.id}`,it.verb),on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.used_required_verb=answerUsesVerb(a,it.verb);}}));
  return t;
@@ -284,7 +293,7 @@ timeline.push({
      cloze_total_answered:answered,
      cloze_total_blank:c.length?71-answered:null,
      cloze_total_completion_rate:c.length?answered/71:null,
-     upload_filename:`${subject_id}.csv`,
+     upload_filename,
      upload_started_at:new Date().toISOString()
    });
  }
@@ -348,7 +357,7 @@ async function uploadToDataPipe(){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       experimentID:DATA_PIPE_EXPERIMENT_ID,
-      filename:`${subject_id}.csv`,
+      filename:upload_filename,
       data:jsPsych.data.get().csv()
     })
   });
