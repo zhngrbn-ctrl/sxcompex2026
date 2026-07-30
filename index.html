@@ -26,7 +26,7 @@ const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP
 const urlParams=new URLSearchParams(window.location.search);
 const urlCell=urlParams.get('cell');
 const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
-const STUDY_VERSION='final_v4_2026-07-30';
+const STUDY_VERSION='final_v7_2026-07-30';
 const ASSET_VERSION='final-v4-20260730';
 const versionedAsset=path=>`${path}?v=${ASSET_VERSION}`;
 const cellMap={
@@ -58,14 +58,16 @@ const VERB_PINYIN={
  '睡觉':['shuijiao'],'跑':['pao'],'跳':['tiao'],'滚':['gun'],'游':['you'],'骑':['qi'],'开':['kai'],'走':['zou'],'飞':['fei'],'划':['hua'],'钻':['zuan'],'爬':['pa'],'搬':['ban'],
  '写':['xie'],'拍照':['paizhao'],'拉':['la'],'唱歌':['changge'],'跳舞':['tiaowu'],'打电话':['dadianhua'],'弹':['tan'],'喝':['he'],'递':['di'],'扔':['reng'],'投':['tou'],'冲':['chong']
 };
-function normalizeAnswer(x){return (x||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z\u4e00-\u9fff]/g,'');}
+function normalizeAnswer(x){return (x||'').toString().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z\u4e00-\u9fff]/g,'');}
+function answerStartsWithB(answer){return normalizeAnswer(answer).startsWith('b');}
 function answerUsesVerb(answer,verb){const n=normalizeAnswer(answer);if(n.includes(verb))return true;return (VERB_PINYIN[verb]||[]).some(py=>n.includes(py));}
 function attachEptValidation(fieldName,verb,isPractice=false){
  const form=document.querySelector('.jspsych-survey-html-form');if(!form)return;
  form.addEventListener('submit',function(ev){
   const input=form.querySelector(`[name="${fieldName}"]`);const raw=input?input.value.trim():'';const compact=normalizeAnswer(raw);
   let msg='';
-  if(!answerUsesVerb(raw,verb)) msg=`请在句子中使用括号里的动词“${verb}”。不会写汉字时，可以写拼音。`;
+  if(!answerStartsWithB(raw)) msg='请用B开头写句子。';
+  else if(!answerUsesVerb(raw,verb)) msg=`请在句子中使用括号里的动词“${verb}”。不会写汉字时，可以写拼音。`;
   else if(compact.length<4) msg='请写一个完整句子，不要只写一个词或短语。';
   if(msg){ev.preventDefault();ev.stopImmediatePropagation();alert(msg);if(input)input.focus();}
  },true);
@@ -263,10 +265,36 @@ timeline.push({timeline:nativePre,conditional_function:()=>{let x=jsPsych.data.g
 // ---------- task builders ----------
 function eptTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p><strong>请使用括号里的动词，用一个完整的句子说明你（A）看到B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须使用括号里的动词，并写成一个完整、自然的句子，不要只写一个词或短语；<br>2. 不会写某个汉字时，可以使用拼音代替；<br>3. 请根据图片中A的位置和B的变化，写出你认为最自然、最准确的句子。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="${EXAMPLE_IMAGE}" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:8px 0 0;">可以回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p class="small-note" style="margin-bottom:0;">请描述B发生的变化，不要只描述右图中的状态。</p></div><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
- t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="${PRACTICE_IMAGE}" onclick="this.classList.toggle('zoomed')" alt="练习图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer" name="practice" required minlength="4" autocomplete="off" placeholder="请在这里输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE},on_load:()=>attachEptValidation('practice','睡觉',true),on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.used_required_verb=answerUsesVerb(a,'睡觉');}});
- t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请根据左右两幅图，使用括号里的动词，写一个完整、自然的句子。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
- eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div><img class="ept-image" src="${it.img}" onclick="this.classList.toggle('zoomed')" alt="实验图片"><div class="ept-question">你（A）看到B从左图到右图发生了什么变化？<br><span class="ept-verb">（动词：${it.verb}）</span></div></div>`,html:`<input class="ept-answer" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请在这里输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1},on_load:()=>attachEptValidation(`ept_${it.id}`,it.verb),on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.used_required_verb=answerUsesVerb(a,it.verb);}}));
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p><strong>请想象你就是图中的A，并把图中发生的事情告诉一位没有看到图片的人。请用B开头，使用括号里的动词，用一个完整、自然的句子直接说明B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须用B开头并使用括号里的动词；<br>2. 请写一个完整、自然的句子，不要只写一个词或短语；<br>3. 句子应包含让听者准确理解这一变化所需要的信息；<br>4. 不同的自然表达都可以，不要求使用某一种固定句式；<br>5. 不会写某个汉字时，可以使用拼音代替。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="${EXAMPLE_IMAGE}" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">请想象你是A，用B开头说明B发生了什么变化。<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:10px 0 6px;">合适的回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p style="margin:6px 0;font-size:15px;">这个回答用B开头，使用了“坐”，并说明了B由站着到坐下的变化。</p><p class="small-note" style="margin-bottom:0;">不要只写“坐下”，也不要只描述右图中的状态，如“B坐着”。</p></div><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
+ const eptComprehensionCheck={
+   type:jsPsychSurveyHtmlForm,
+   preamble:'<h3>开始前确认</h3><p>请根据刚才的说明回答下面两个问题。</p>',
+   html:`<div style="text-align:left;max-width:720px;margin:auto;line-height:2;">
+     <p><strong>1. 图片中的A代表谁？</strong><br>
+       <label><input type="radio" name="a_role" value="self" required> 正在作答的你</label><br>
+       <label><input type="radio" name="a_role" value="b"> 图片中的B</label><br>
+       <label><input type="radio" name="a_role" value="researcher"> 主试</label>
+     </p>
+     <p><strong>2. 描述图片时应该怎样作答？</strong><br>
+       <label><input type="radio" name="answer_rule" value="b_verb_sentence" required> 用B开头，使用括号里的动词，写一个完整句子</label><br>
+       <label><input type="radio" name="answer_rule" value="any_verb"> 可以使用任意动词</label><br>
+       <label><input type="radio" name="answer_rule" value="word_only"> 只写一个词或短语</label>
+     </p>
+   </div>`,
+   button_label:'提交确认',
+   data:{task_type:'EPT_comprehension'},
+   on_finish:d=>{
+     d.comprehension_correct=d.response?.a_role==='self'&&d.response?.answer_rule==='b_verb_sentence';
+     if(!d.comprehension_correct) alert('有一项回答不正确，请重新确认任务要求。');
+   }
+ };
+ t.push({
+   timeline:[eptComprehensionCheck],
+   loop_function:data=>data.last(1).values()[0]?.comprehension_correct!==true
+ });
+ t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">练习题</div><img class="ept-image" src="${PRACTICE_IMAGE}" onclick="this.classList.toggle('zoomed')" alt="练习图片"><div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer" name="practice" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE},on_load:()=>attachEptValidation('practice','睡觉',true),on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,'睡觉');}});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请想象你是A。请用B开头，使用括号里的动词，写一个完整、自然的句子，直接描述B发生的变化。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
+ eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div><img class="ept-image" src="${it.img}" onclick="this.classList.toggle('zoomed')" alt="实验图片"><div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：${it.verb}）</span></div></div>`,html:`<input class="ept-answer" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1},on_load:()=>attachEptValidation(`ept_${it.id}`,it.verb),on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,it.verb);}}));
  return t;
 }
 function ajtTimeline(){
