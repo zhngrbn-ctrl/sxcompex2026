@@ -18,6 +18,13 @@ h1,h2,h3{color:#102033}.jspsych-btn{background:#2563eb;color:#fff;border:0;borde
 input[type=text],input[type=number],select,textarea{border:1px solid #cbd5e1;border-radius:7px;padding:10px 12px;font-size:16px;font-family:inherit;box-sizing:border-box}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
 .cloze-passage{font-size:18px;line-height:2.35;text-align:left}.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-left:5px solid #3b82f6;padding:18px 22px;border-radius:8px;text-align:left;line-height:1.85}.warn-box{background:#fff7ed;border:1px solid #fed7aa;padding:15px 18px;border-radius:8px;text-align:left}.ept-wrap{max-width:1120px;margin:auto}.ept-image{display:block;width:100%;max-height:62vh;object-fit:contain;border:1px solid #d7dee8;border-radius:8px;background:white;cursor:zoom-in}.ept-image.zoomed{max-height:none;cursor:zoom-out}.ept-answer{width:92%;max-width:760px;height:54px;font-size:20px;margin-top:18px}.kaiti{font-family:KaiTi,STKaiti,"楷体",serif;font-size:25px;font-weight:600}.trial-counter{font-size:14px;color:#64748b;margin-bottom:10px}.ajt-context{font-size:18px;line-height:1.75;text-align:left;background:#f8fafc;padding:18px 20px;border-radius:8px;margin-bottom:22px}.ajt-lead-in{margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:18px;font-weight:700;color:#334155}.ajt-sentence{font-family:KaiTi,STKaiti,"楷体",serif;font-size:27px;line-height:1.6;color:#2563eb;font-weight:600}.ept-question{font-size:21px;line-height:1.7;text-align:center;margin:18px auto 4px;color:#27364a}.ept-verb{font-family:KaiTi,STKaiti,"楷体",serif;font-size:24px;font-weight:700;color:#0f172a}.jspsych-survey-likert-statement{margin-bottom:34px}.small-note{font-size:13px;color:#64748b}.break-card{text-align:center;line-height:1.9}@media(max-width:760px){.jspsych-content{padding:24px 18px}.ept-image{max-height:52vh}.ajt-sentence{font-size:23px}}
+.instruction-lead{font-size:22px;line-height:1.75;font-weight:750;color:#174a7e;text-align:center;margin:8px auto 18px;max-width:880px}
+.instruction-lead .blue-sentence{color:#2563eb;font-weight:800}
+.instruction-steps{font-size:17px;line-height:2;margin:8px 0 14px;padding-left:4px}
+.instruction-steps strong{color:#9a3412}
+.instruction-scale{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 0 14px;padding:12px 0;border-top:1px solid #93c5fd;border-bottom:1px solid #93c5fd;font-size:17px;font-weight:750;color:#0f3d66}
+.instruction-scale .scale-middle{font-weight:500;color:#64748b;text-align:center}
+@media(max-width:760px){.instruction-lead{font-size:20px}.instruction-steps{font-size:16px}.instruction-scale{align-items:flex-start;flex-direction:column;gap:4px}.instruction-scale .scale-middle{display:none}}
 </style>
 </head><body><script>
 function getAgeOptions(){let s='<option value="" disabled selected>请选择</option>';for(let i=16;i<=60;i++)s+=`<option value="${i}">${i}岁</option>`;return s;}
@@ -26,7 +33,7 @@ const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP
 const urlParams=new URLSearchParams(window.location.search);
 const urlCell=urlParams.get('cell');
 const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
-const STUDY_VERSION='final_v7_2026-07-30';
+const STUDY_VERSION='final_v8_2026-07-30';
 const ASSET_VERSION='final-v4-20260730';
 const versionedAsset=path=>`${path}?v=${ASSET_VERSION}`;
 const cellMap={
@@ -265,7 +272,7 @@ timeline.push({timeline:nativePre,conditional_function:()=>{let x=jsPsych.data.g
 // ---------- task builders ----------
 function eptTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p><strong>请想象你就是图中的A，并把图中发生的事情告诉一位没有看到图片的人。请用B开头，使用括号里的动词，用一个完整、自然的句子直接说明B从左图到右图发生了什么变化。</strong></p><p><strong>请注意：</strong><br>1. 必须用B开头并使用括号里的动词；<br>2. 请写一个完整、自然的句子，不要只写一个词或短语；<br>3. 句子应包含让听者准确理解这一变化所需要的信息；<br>4. 不同的自然表达都可以，不要求使用某一种固定句式；<br>5. 不会写某个汉字时，可以使用拼音代替。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="${EXAMPLE_IMAGE}" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">请想象你是A，用B开头说明B发生了什么变化。<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:10px 0 6px;">合适的回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p style="margin:6px 0;font-size:15px;">这个回答用B开头，使用了“坐”，并说明了B由站着到坐下的变化。</p><p class="small-note" style="margin-bottom:0;">不要只写“坐下”，也不要只描述右图中的状态，如“B坐着”。</p></div><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题都有左右两幅图。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p class="instruction-lead">请想象你就是图中的A，并把图中发生的事情告诉一位没有看到图片的人。</p><div class="instruction-steps"><strong>作答要求</strong><br>1. 请用<strong>B开头</strong>；<br>2. 必须使用<strong>括号里的动词</strong>；<br>3. 写一个<strong>完整、自然的句子</strong>，说明B从左图到右图发生了什么变化；<br>4. 句子应包含让听者准确理解这一变化所需要的信息。</div><p>不同的自然表达都可以，不要求使用某一种固定句式。不会写某个汉字时，可以使用拼音代替。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="${EXAMPLE_IMAGE}" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">请想象你是A，用B开头说明B发生了什么变化。<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:10px 0 6px;">合适的回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p style="margin:6px 0;font-size:15px;">这个回答用B开头，使用了“坐”，并说明了B由站着到坐下的变化。</p><p class="small-note" style="margin-bottom:0;">不要只写“坐下”，也不要只描述右图中的状态，如“B坐着”。</p></div><p class="small-note">图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
  const eptComprehensionCheck={
    type:jsPsychSurveyHtmlForm,
    preamble:'<h3>开始前确认</h3><p>请根据刚才的说明回答下面两个问题。</p>',
@@ -299,7 +306,7 @@ function eptTimeline(){
 }
 function ajtTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>句子自然度判断任务</h3><div class="info-box"><p>每道题先给出一个情境，情境后面会有一句引导语，并呈现一个<strong style="color:#2563eb">蓝色句子</strong>。</p><p>请根据前面的情境，判断<strong style="color:#2563eb">蓝色句子</strong>是否自然、合适。</p><p>请注意句子的语法、动作方向和人物位置。不需要判断情境本身是否合理。</p><p>1＝非常不自然；2＝比较不自然；3＝介于自然和不自然之间；4＝比较自然；5＝非常自然。</p><p>请根据第一感觉选择1—5分。</p></div>`,choices:['进行练习']});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>句子自然度判断任务</h3><div class="info-box"><p>每道题先给出一个情境，然后呈现一个蓝色句子。</p><p class="instruction-lead">请结合前面的情境，判断<span class="blue-sentence">蓝色句子</span>听起来有多自然、合适。</p><div class="instruction-steps">1. 请把情境当作<strong>已经发生</strong>；<br>2. 评价<strong>整句话在该情境中</strong>的自然程度；<br>3. 不需要判断情境本身是否常见，也不需要猜测研究者期待的答案；<br>4. 请根据<strong>第一感觉</strong>选择1—5分。</div><div class="instruction-scale"><span>1　非常不自然</span><span class="scale-middle">2　比较不自然　　3　介于两者之间　　4　比较自然</span><span>5　非常自然</span></div></div>`,choices:['进行练习']});
  t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习1</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王的衣服全湿了。</div>',labels:scale,required:true}],button_label:'下一道练习'});
  t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习2</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王全衣服湿了。</div>',labels:scale,required:true}],button_label:'提交练习'});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务没有标准答案，请结合具体情境，根据自己的第一感觉判断句子的自然程度。</div>',choices:['开始正式任务']});
