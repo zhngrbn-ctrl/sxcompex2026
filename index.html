@@ -24,6 +24,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;box-sh
 .instruction-steps strong{color:#9a3412}
 .instruction-scale{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 0 14px;padding:12px 0;border-top:1px solid #93c5fd;border-bottom:1px solid #93c5fd;font-size:17px;font-weight:750;color:#0f3d66}
 .instruction-scale .scale-middle{font-weight:500;color:#64748b;text-align:center}
+.ept-pinyin{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:550;color:#475569;margin-left:5px}
 @media(max-width:760px){.instruction-lead{font-size:20px}.instruction-steps{font-size:16px}.instruction-scale{align-items:flex-start;flex-direction:column;gap:4px}.instruction-scale .scale-middle{display:none}}
 </style>
 </head><body><script>
@@ -33,8 +34,8 @@ const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP
 const urlParams=new URLSearchParams(window.location.search);
 const urlCell=urlParams.get('cell');
 const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
-const STUDY_VERSION='final_v9_2026-07-30';
-const ASSET_VERSION='final-v4-20260730';
+const STUDY_VERSION='final_v13_2026-08-03';
+const ASSET_VERSION='final-v7-20260803';
 const versionedAsset=path=>`${path}?v=${ASSET_VERSION}`;
 const cellMap={
   '1':{task_order:'EPT_AJT',ajt_list:'A'},
@@ -62,9 +63,14 @@ const PRACTICE_IMAGE=versionedAsset('assets/practice.png');
 // ---------- utilities ----------
 function shuffle(a){return jsPsych.randomization.shuffle(a.slice())}
 const VERB_PINYIN={
- '睡觉':['shuijiao'],'跑':['pao'],'跳':['tiao'],'滚':['gun'],'游':['you'],'骑':['qi'],'开':['kai'],'走':['zou'],'飞':['fei'],'划':['hua'],'钻':['zuan'],'爬':['pa'],'搬':['ban'],
+ '睡觉':['shuijiao'],'跑':['pao'],'跳':['tiao'],'滚':['gun'],'游':['you'],'骑':['qi'],'开':['kai'],'打开':['dakai'],'走':['zou'],'飞':['fei'],'划':['hua'],'钻':['zuan'],'爬':['pa'],'搬':['ban'],
  '写':['xie'],'拍照':['paizhao'],'拉':['la'],'唱歌':['changge'],'跳舞':['tiaowu'],'打电话':['dadianhua'],'弹':['tan'],'喝':['he'],'递':['di'],'扔':['reng'],'投':['tou'],'冲':['chong']
 };
+const VERB_TONE_PINYIN={
+ '坐':'zuò','睡觉':'shuì jiào','跑':'pǎo','跳':'tiào','滚':'gǔn','游':'yóu','骑':'qí','开':'kāi','打开':'dǎ kāi','走':'zǒu','飞':'fēi','划':'huá','钻':'zuān','爬':'pá','搬':'bān',
+ '写':'xiě','拍照':'pāi zhào','拉':'lā','唱歌':'chàng gē','跳舞':'tiào wǔ','打电话':'dǎ diàn huà','弹':'tán','喝':'hē','递':'dì','扔':'rēng','投':'tóu','冲':'chōng'
+};
+function eptVerbLabel(verb){const py=VERB_TONE_PINYIN[verb];return `${verb}${py?`<span class="ept-pinyin">（${py}）</span>`:''}`;}
 function normalizeAnswer(x){return (x||'').toString().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z\u4e00-\u9fff]/g,'');}
 function answerStartsWithB(answer){return normalizeAnswer(answer).startsWith('b');}
 function answerUsesVerb(answer,verb){const n=normalizeAnswer(answer);if(n.includes(verb))return true;return (VERB_PINYIN[verb]||[]).some(py=>n.includes(py));}
@@ -173,7 +179,7 @@ const eptItemsRaw=[
 {id:'EPTF09',type:'filler',img:IMAGE_PATHS[25],scene:'dining',verb:'喝'},
 {id:'EPTF10',type:'filler',img:IMAGE_PATHS[26],scene:'park_bench',event:'give_book',verb:'递'},
 {id:'EPTF11',type:'filler',img:IMAGE_PATHS[27],scene:'office',verb:'扔'},
-{id:'EPTF12',type:'filler',img:IMAGE_PATHS[28],scene:'basketball',verb:'投'}];
+{id:'EPTF12',type:'filler',img:IMAGE_PATHS[28],scene:'umbrella',event:'open_umbrella',verb:'打开'}];
 const eptItems=makeEptOrder(eptItemsRaw);
 
 // ---------- AJT target frames from AJT目标题候选定稿.docx ----------
@@ -181,25 +187,25 @@ const ajtFrames=[
 {id:'V1_01',lead_in:'这时，我说：',variable:'V1',scene:'office',context:'我坐在办公桌旁。同事站在门口，手里拿着一份需要我签字的文件。',A:'过一会儿，同事把文件拿过来了。',B:'过一会儿，同事把文件拿过去了。',legal:'A'},
 {id:'V1_02',lead_in:'这时，我说：',variable:'V1',scene:'private_room',context:'我和服务员都在厨房门口，服务员手里端着饭菜。客人坐在包间的餐桌旁。',A:'过一会儿，服务员把饭菜端过去了。',B:'过一会儿，服务员把饭菜端过来了。',legal:'A'},
 {id:'V1_03',lead_in:'这时，我说：',variable:'V1',scene:'meeting_room',context:'我们正在会议室开会，发现还少一把椅子。同事去隔壁办公室找了一把。',A:'过一会儿，同事把椅子推过来了。',B:'过一会儿，同事把椅子推过去了。',legal:'A'},
-{id:'V1_04',lead_in:'这时，我说：',variable:'V1',scene:'courtyard',context:'我和工人站在院子门口，几盆花放在我们旁边，准备摆到院子的另一边。',A:'过一会儿，工人把花盆搬过去了。',B:'过一会儿，工人把花盆搬过来了。',legal:'A'},
+{id:'V1_04',lead_in:'这时，我说：',variable:'V1',scene:'sports_field',context:'我和同学站在操场的一边，足球就在我们旁边。几个朋友在操场的另一边等着踢球。',A:'过一会儿，同学把足球踢过去了。',B:'过一会儿，同学把足球踢过来了。',legal:'A'},
 {id:'V1_05',lead_in:'这时，我说：',variable:'V1',scene:'reception',context:'我在接待处等新同学。老师和新同学还在大厅的另一边。',A:'过一会儿，老师把新同学带过来了。',B:'过一会儿，老师把新同学带过去了。',legal:'A'},
 {id:'V1_06',lead_in:'这时，我说：',variable:'V1',scene:'living_room',context:'我和朋友都在客厅，茶几上放着一杯水。在阳台上晒太阳的奶奶说口渴了。',A:'过一会儿，朋友把水送过去了。',B:'过一会儿，朋友把水送过来了。',legal:'A'},
-{id:'V1_07',lead_in:'这时，我说：',variable:'V1',scene:'library',context:'我在阅览桌旁整理图书。一名学生在书架旁抱着一摞新书。',A:'过一会儿，学生把这摞书抱过来了。',B:'过一会儿，学生把这摞书抱过去了。',legal:'A'},
+{id:'V1_07',lead_in:'这时，我说：',variable:'V1',scene:'library',context:'我在阅览桌旁查一个生词。一名学生在书架旁抱着一本很厚的字典。',A:'过一会儿，学生把那本字典抱过来了。',B:'过一会儿，学生把那本字典抱过去了。',legal:'A'},
 {id:'V1_08',lead_in:'这时，我说：',variable:'V1',scene:'classroom',context:'我在讲台旁边帮老师整理东西，讲台旁放着一张备用桌子。老师发现教室最后一排还少一张桌子，两个学生正站在我们旁边。',A:'过一会儿，两个学生把桌子抬过去了。',B:'过一会儿，两个学生把桌子抬过来了。',legal:'A'},
-{id:'V2_01',lead_in:'这时，我说：',variable:'V2',scene:'office',context:'我在办公室里整理材料。同事在门外，手里拿着一份文件。',A:'同事准备把文件拿进办公室来。',B:'同事准备把文件拿进来办公室。',legal:'A'},
+{id:'V2_01',lead_in:'这时，我说：',variable:'V2',scene:'office',context:'我正在办公室里工作。同事在门外，手里拿着一份文件。',A:'同事准备把文件拿进办公室来。',B:'同事准备把文件拿进来办公室。',legal:'A'},
 {id:'V2_02',lead_in:'这时，我说：',variable:'V2',scene:'warehouse',context:'我和工人都在仓库里，最后一箱货物放在工人旁边。外面的货车还在等这箱货物。',A:'工人准备把这箱货物搬出仓库去。',B:'工人准备把这箱货物搬出去仓库。',legal:'A'},
 {id:'V2_03',lead_in:'这时，我说：',variable:'V2',scene:'private_room',context:'我在包间里招待客人。服务员在门外，茶已经准备好了。',A:'服务员准备把茶端进包间来。',B:'服务员准备把茶端进来包间。',legal:'A'},
 {id:'V2_04',lead_in:'这时，我说：',variable:'V2',scene:'supermarket',context:'我去超市买东西时，看到一名顾客已经结完账，购物车里装得满满的，正准备去外面的停车场。',A:'过一会儿，顾客把购物车推出超市去了。',B:'过一会儿，顾客把购物车推出去超市了。',legal:'A'},
-{id:'V2_05',lead_in:'这时，我说：',variable:'V2',scene:'classroom',context:'我和同学都在讲台下面，同学抱着一摞新书。讲台上正需要这摞书。',A:'同学准备把这摞书抱上讲台去。',B:'同学准备把这摞书抱上去讲台。',legal:'A'},
+{id:'V2_05',lead_in:'这时，我说：',variable:'V2',scene:'classroom',context:'我和同学都在讲台下面，同学抱着一个纸箱。老师要用的东西都在纸箱里。',A:'同学准备把纸箱抱上讲台去。',B:'同学准备把纸箱抱上去讲台。',legal:'A'},
 {id:'V2_06',lead_in:'这时，我说：',variable:'V2',scene:'meeting_room',context:'我在会议室里等参会人员。助理在门外，手里拿着会议材料。',A:'助理准备把材料送进会议室来。',B:'助理准备把材料送进来会议室。',legal:'A'},
 {id:'V2_07',lead_in:'这时，我说：',variable:'V2',scene:'dorm',context:'我在宿舍里整理家具。两个同学在门外扶着一张桌子。',A:'两个同学准备把桌子抬进宿舍来。',B:'两个同学准备把桌子抬进来宿舍。',legal:'A'},
-{id:'V2_08',lead_in:'这时，我说：',variable:'V2',scene:'truck',context:'我和工人都在地面上，最后一箱货物放在工人旁边。卡车上还缺这箱货物。',A:'工人准备把这箱货物搬上卡车去。',B:'工人准备把这箱货物搬上去卡车。',legal:'A'},
-{id:'V3_01',lead_in:'这时，我说：',variable:'V3',scene:'records_room',context:'我在资料室里整理作业。班长在门外抱着一摞刚收的作业。',A:'过一会儿，班长把这摞作业抱进资料室来了。',B:'过一会儿，班长把这摞作业抱进资料室去了。',legal:'A'},
+{id:'V2_08',lead_in:'这时，我说：',variable:'V2',scene:'hillside',context:'我和小王都在山脚，食物放在小王旁边。山坡上的朋友正在等我们送食物。',A:'小王准备把食物拿上山坡去。',B:'小王准备把食物拿上去山坡。',legal:'A'},
+{id:'V3_01',lead_in:'这时，我说：',variable:'V3',scene:'room_picture',context:'我在房间里整理东西。同学在门外，手里拿着一张准备挂到墙上的画。',A:'过一会儿，同学把画拿进房间来了。',B:'过一会儿，同学把画拿进房间去了。',legal:'A'},
 {id:'V3_02',lead_in:'这时，我说：',variable:'V3',scene:'lobby',context:'我在大厅里等工作人员。工作人员在门外扶着一辆轮椅。',A:'过一会儿，工作人员把轮椅推进大厅来了。',B:'过一会儿，工作人员把轮椅推进大厅去了。',legal:'A'},
 {id:'V3_03',lead_in:'这时，我说：',variable:'V3',scene:'office',context:'我和助理都在办公室门外。领导正在里面等一份文件，我还要留在走廊接待客人。',A:'过一会儿，助理把文件送进办公室去了。',B:'过一会儿，助理把文件送进办公室来了。',legal:'A'},
 {id:'V3_04',lead_in:'这时，我说：',variable:'V3',scene:'reception_room',context:'我和工作人员都在接待室门外。新来的客人需要先在里面登记，我还要留在门口等其他人。',A:'过一会儿，工作人员把客人带进接待室去了。',B:'过一会儿，工作人员把客人带进接待室来了。',legal:'A'},
 {id:'V3_05',lead_in:'这时，我说：',variable:'V3',scene:'stairs',context:'我们吃完饭回办公室，到了门口才发现大家都没有带钥匙。唯一带钥匙的同事还在楼下。',A:'过一会儿，同事把钥匙拿上楼来了。',B:'过一会儿，同事把钥匙拿上楼去了。',legal:'A'},
-{id:'V3_06',lead_in:'这时，我说：',variable:'V3',scene:'building',context:'我和工人都在楼下，一箱货物放在工人旁边。楼上办公室还缺这箱货物，我要留在楼下核对数量。',A:'过一会儿，工人把货物搬上楼去了。',B:'过一会儿，工人把货物搬上楼来了。',legal:'A'},
+{id:'V3_06',lead_in:'这时，我说：',variable:'V3',scene:'dorm_building',context:'我和同学到了宿舍楼下。楼上的室友身体不舒服，正在等我们送药，我要留在楼下看行李。',A:'过一会儿，同学把药拿上楼去了。',B:'过一会儿，同学把药拿上楼来了。',legal:'A'},
 {id:'V3_07',lead_in:'这时，我说：',variable:'V3',scene:'school',context:'老师正在楼下办公室给我讲错题，暂时抽不开身。楼上教室里还有大家的作业，他让班长负责收齐后交给他。',A:'过一会儿，班长把作业送下楼来了。',B:'过一会儿，班长把作业送下楼去了。',legal:'A'},
 {id:'V3_08',lead_in:'这时，我说：',variable:'V3',scene:'restaurant',context:'我们几个服务员正在餐厅里整理餐具。这时，花园里的客人点了一壶茶。',A:'过一会儿，服务员小王把茶端出餐厅去了。',B:'过一会儿，服务员小王把茶端出餐厅来了。',legal:'A'}];
 const listPatternA={V1:['A','B','A','A','B','A','B','B'],V2:['B','A','B','A','A','B','A','B'],V3:['A','B','B','A','B','A','A','B']};
@@ -298,7 +304,7 @@ timeline.push({timeline:nativePre,conditional_function:()=>{let x=jsPsych.data.g
 // ---------- task builders ----------
 function eptTimeline(){
  let t=[];
- t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题先显示左图，右侧暂时为空白；稍后右图出现，并与左图同时保留。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p class="instruction-lead">请想象你就是图中的A，并把图中发生的事情告诉一位没有看到图片的人。</p><div class="instruction-steps"><strong>作答要求</strong><br>1. 请用<strong>B开头</strong>；<br>2. 必须使用<strong>括号里的动词</strong>；<br>3. 写一个<strong>完整、自然的句子</strong>，说明B从左图到右图发生了什么变化；<br>4. 句子应包含让听者准确理解这一变化所需要的信息。</div><p>不同的自然表达都可以，不要求使用某一种固定句式。不会写某个汉字时，可以使用拼音代替。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="${EXAMPLE_IMAGE}" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">请想象你是A，用B开头说明B发生了什么变化。<br><span class="ept-verb">（动词：坐）</span></div><p style="margin:10px 0 6px;">合适的回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p style="margin:6px 0;font-size:15px;">这个回答用B开头，使用了“坐”，并说明了B由站着到坐下的变化。</p><p class="small-note" style="margin-bottom:0;">不要只写“坐下”，也不要只描述右图中的状态，如“B坐着”。</p></div><p class="small-note">正式图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
+ t.push({type:jsPsychHtmlButtonResponse,stimulus:`<h3>图片描述任务</h3><div class="info-box"><p>下面你会看到一些图片。每道题先显示左图，右侧暂时为空白；稍后右图出现，并与左图同时保留。左图表示开始时的情况，右图表示后来发生的情况。图片中的A代表“你”，B代表另一个人、动物或物体。</p><p class="instruction-lead">请想象你就是图中的A，并把图中发生的事情告诉一位没有看到图片的人。</p><div class="instruction-steps"><strong>作答要求</strong><br>1. 请用<strong>B开头</strong>；<br>2. 必须使用<strong>括号里的动词</strong>；<br>3. 写一个<strong>完整、自然的句子</strong>，说明B从左图到右图发生了什么变化；<br>4. 句子应包含让听者准确理解这一变化所需要的信息。</div><p>不同的自然表达都可以，不要求使用某一种固定句式。不会写某个汉字时，可以使用拼音代替。</p><div class="example-box" style="margin-top:22px;text-align:center;"><strong>【示例】</strong><img class="ept-image" src="${EXAMPLE_IMAGE}" alt="示例图片" style="margin-top:12px;max-height:48vh;cursor:default;"><div class="ept-question">请想象你是A，用B开头说明B发生了什么变化。<br><span class="ept-verb">（动词：${eptVerbLabel('坐')}）</span></div><p style="margin:10px 0 6px;">合适的回答：<span class="kaiti" style="font-size:22px;">B坐下了。</span></p><p style="margin:6px 0;font-size:15px;">这个回答用B开头，使用了“坐”，并说明了B由站着到坐下的变化。</p><p class="small-note" style="margin-bottom:0;">不要只写“坐下”，也不要只描述右图中的状态，如“B坐着”。</p></div><p class="small-note">正式图片可点击放大，再次点击恢复。</p></div>`,choices:['进行练习']});
  const eptComprehensionCheck={
    type:jsPsychSurveyHtmlForm,
    preamble:'<h3>开始前确认</h3><p>请根据刚才的说明回答下面两个问题。</p>',
@@ -325,9 +331,9 @@ function eptTimeline(){
    timeline:[eptComprehensionCheck],
    loop_function:data=>data.last(1).values()[0]?.comprehension_correct!==true
  });
- t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">练习题</div>${sequentialEptImage(PRACTICE_IMAGE,'练习图片')}<div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：睡觉）</span></div></div>`,html:'<input class="ept-answer awaiting-reveal" name="practice" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation('practice','睡觉',true);attachSequentialEpt('practice');},on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,'睡觉');}});
+ t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">练习题</div>${sequentialEptImage(PRACTICE_IMAGE,'练习图片')}<div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：${eptVerbLabel('睡觉')}）</span></div></div>`,html:'<input class="ept-answer awaiting-reveal" name="practice" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation('practice','睡觉',true);attachSequentialEpt('practice');},on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,'睡觉');}});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请想象你是A。请用B开头，使用括号里的动词，写一个完整、自然的句子，直接描述B发生的变化。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
- eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div>${sequentialEptImage(it.img,'实验图片')}<div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：${it.verb}）</span></div></div>`,html:`<input class="ept-answer awaiting-reveal" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation(`ept_${it.id}`,it.verb);attachSequentialEpt(`ept_${it.id}`);},on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,it.verb);}}));
+ eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div>${sequentialEptImage(it.img,'实验图片')}<div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：${eptVerbLabel(it.verb)}）</span></div></div>`,html:`<input class="ept-answer awaiting-reveal" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation(`ept_${it.id}`,it.verb);attachSequentialEpt(`ept_${it.id}`);},on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,it.verb);}}));
  return t;
 }
 function ajtTimeline(){

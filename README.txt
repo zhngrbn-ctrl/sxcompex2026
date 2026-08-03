@@ -1,4 +1,4 @@
-汉语趋向表达实验（修订预试版 v4）
+汉语趋向表达实验（修订预试版 v13）
 
 部署：将 index.html、assets 与 vendor 文件夹保持在同一级目录，整体上传到静态网站。
 DataPipe Experiment ID：IRsUduBNRMIB
