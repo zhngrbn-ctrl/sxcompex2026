@@ -36,8 +36,9 @@ const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP
 const urlParams=new URLSearchParams(window.location.search);
 const urlCell=urlParams.get('cell');
 const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
-const STUDY_VERSION='final_v14_2026-08-03';
+const STUDY_VERSION='final_v15_2026-08-03';
 const ASSET_VERSION='final-v8-20260803';
+const ITEM_RANDOMIZATION_VERSION='balanced-block-v1';
 const versionedAsset=path=>`${path}?v=${ASSET_VERSION}`;
 const cellMap={
   '1':{task_order:'EPT_AJT',ajt_list:'A'},
@@ -54,7 +55,7 @@ const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
 const upload_filename=`${experiment_phase}_${subject_id}.csv`;
-jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,experiment_phase,study_version:STUDY_VERSION,datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
+jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,experiment_phase,study_version:STUDY_VERSION,item_randomization_version:ITEM_RANDOMIZATION_VERSION,datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1":"assets/ept_01.png","2":"assets/ept_02.png","3":"assets/ept_03.png","4":"assets/ept_04.png","5":"assets/ept_05.png","6":"assets/ept_06.png","7":"assets/ept_07.png","8":"assets/ept_08.png","9":"assets/ept_09.png","10":"assets/ept_10_跑出教室去_v1.png","11":"assets/ept_11_跑上二楼去_v7_B标签靠近人物.png","12":"assets/ept_12_划出山洞来.png","13":"assets/ept_13_冲出图书馆来.png","14":"assets/ept_14_钻进帐篷去.png","15":"assets/ept_15_跳下舞台去.png","16":"assets/ept_16_爬上观景台来.png","17":"assets/ept_17_写会议要点.png","18":"assets/ept_18_拍照.png","19":"assets/ept_19_跑步.png","20":"assets/ept_20.png","21":"assets/ept_21.png","22":"assets/ept_22.png","23":"assets/ept_23.png","24":"assets/ept_24.png","25":"assets/ept_25.png","26":"assets/ept_26.png","27":"assets/ept_27.png","28":"assets/ept_28.png"};
@@ -114,42 +115,65 @@ function sequentialEptImage(src,alt){
  return `<div class="ept-phase-cue" aria-live="polite"></div><div class="ept-stage"><img class="ept-image" src="${src}" onclick="this.classList.toggle('zoomed')" alt="${alt}"><div class="ept-right-mask" aria-hidden="true"></div></div>`;
 }
 function noThreeSame(arr,key){for(let i=2;i<arr.length;i++)if(arr[i][key]===arr[i-1][key]&&arr[i][key]===arr[i-2][key])return false;return true}
-function makeEptOrder(items){for(let attempt=0;attempt<3000;attempt++){let x=shuffle(items);let ok=true;for(let i=1;i<x.length;i++){if(x[i].scene===x[i-1].scene)ok=false;if(x[i].family&&x[i].family===x[i-1].family&&x[i].type==='target'&&x[i-1].type==='target')ok=false;}if(ok&&noThreeSame(x,'type'))return x;}return items;}
-function blockIsGood(z,previous){
-  for(let i=1;i<z.length;i++){
-    if(z[i].variable&&z[i-1].variable&&z[i].variable===z[i-1].variable)return false;
-    if(z[i].scene&&z[i-1].scene&&z[i].scene===z[i-1].scene)return false;
+function appendIfFits(out,item,kind){
+  const n=out.length,prev=n?out[n-1]:null;
+  if(prev&&item.scene&&prev.scene===item.scene)return false;
+  if(prev&&item.family&&prev.family&&item.family===prev.family&&item.type==='target'&&prev.type==='target')return false;
+  if(kind==='ept'&&n>=2&&item.type===out[n-1].type&&item.type===out[n-2].type)return false;
+  if(kind==='ajt'){
+    if(prev&&item.variable&&prev.variable&&item.variable===prev.variable)return false;
+    if(n>=2&&item.condition===out[n-1].condition&&item.condition===out[n-2].condition)return false;
+    const itemKind=item.variable?'target':'filler';
+    const prevKind=out[n-1]?.variable?'target':'filler';
+    const prevPrevKind=out[n-2]?.variable?'target':'filler';
+    if(n>=2&&itemKind===prevKind&&itemKind===prevPrevKind)return false;
   }
-  if(!noThreeSame(z,'condition'))return false;
-  if(previous){
-    if(previous.variable&&z[0].variable&&previous.variable===z[0].variable)return false;
-    if(previous.scene&&z[0].scene&&previous.scene===z[0].scene)return false;
-  }
+  out.push(item);
   return true;
 }
-function makeAjtOrder(targets,fillers){
-  const source=[...targets,...fillers];
-  const kind=x=>x.variable?'target':'filler';
-  const fits=(out,x)=>{
-    const n=out.length,prev=n?out[n-1]:null;
-    if(prev&&x.variable&&prev.variable&&x.variable===prev.variable)return false;
-    if(prev&&x.scene&&prev.scene&&x.scene===prev.scene)return false;
-    if(n>=2&&x.condition===out[n-1].condition&&x.condition===out[n-2].condition)return false;
-    if(n>=2&&kind(x)===kind(out[n-1])&&kind(x)===kind(out[n-2]))return false;
-    return true;
-  };
+function takeFromPool(pool,n){const picked=shuffle(pool).slice(0,n);picked.forEach(x=>pool.splice(pool.indexOf(x),1));return picked}
+function makeEptOrder(items){
+  const familyKeys=['guo-lai','guo-qu','place-lai','place-qu'];
+  const targets=Object.fromEntries(familyKeys.map(k=>[k,items.filter(x=>x.family===k)]));
+  const fillers=items.filter(x=>x.type==='filler');
   for(let attempt=0;attempt<5000;attempt++){
-    const remaining=shuffle(source),out=[];
-    while(remaining.length){
-      const candidates=[];
-      for(let i=0;i<remaining.length;i++)if(fits(out,remaining[i]))candidates.push(i);
-      if(!candidates.length)break;
-      const pick=candidates[Math.floor(Math.random()*candidates.length)];
-      out.push(remaining.splice(pick,1)[0]);
+    const remaining=Object.fromEntries(familyKeys.map(k=>[k,targets[k].slice()]));
+    const remainingFillers=fillers.slice(),out=[];let success=true;
+    for(let block=1;block<=4;block++){
+      const blockItems=familyKeys.flatMap(k=>takeFromPool(remaining[k],1)).concat(takeFromPool(remainingFillers,3));
+      let chosen=null;
+      for(let local=0;local<1000&&!chosen;local++){
+        const candidate=shuffle(blockItems),trial=out.slice();
+        if(candidate.every(item=>appendIfFits(trial,item,'ept')))chosen=candidate;
+      }
+      if(!chosen){success=false;break;}
+      chosen.forEach(item=>out.push({...item,presentation_block:block}));
     }
-    if(out.length===source.length&&blockIsGood(out,null))return out;
+    if(success&&out.length===items.length)return out;
   }
-  throw new Error('无法生成满足AJT相邻约束的题目顺序');
+  throw new Error('无法生成满足EPT区块配额与相邻约束的题目顺序');
+}
+function makeAjtOrder(targets,fillers){
+  const variables=['V1','V2','V3'],conditions=['grammatical','ungrammatical'];
+  for(let attempt=0;attempt<5000;attempt++){
+    const targetPools=Object.fromEntries(variables.flatMap(v=>conditions.map(c=>[`${v}|${c}`,targets.filter(x=>x.variable===v&&x.condition===c)])));
+    const fillerPools=Object.fromEntries(conditions.map(c=>[c,fillers.filter(x=>x.condition===c)]));
+    const out=[];let success=true;
+    for(let block=1;block<=4;block++){
+      const blockItems=[];
+      variables.forEach(v=>conditions.forEach(c=>blockItems.push(...takeFromPool(targetPools[`${v}|${c}`],1))));
+      conditions.forEach(c=>blockItems.push(...takeFromPool(fillerPools[c],3)));
+      let chosen=null;
+      for(let local=0;local<1500&&!chosen;local++){
+        const candidate=shuffle(blockItems),trial=out.slice();
+        if(candidate.every(item=>appendIfFits(trial,item,'ajt')))chosen=candidate;
+      }
+      if(!chosen){success=false;break;}
+      chosen.forEach(item=>out.push({...item,presentation_block:block}));
+    }
+    if(success&&out.length===targets.length+fillers.length)return out;
+  }
+  throw new Error('无法生成满足AJT区块配额与相邻约束的题目顺序');
 }
 
 // ---------- EPT items ----------
@@ -335,7 +359,7 @@ function eptTimeline(){
  });
  t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">练习题</div>${sequentialEptImage(PRACTICE_IMAGE,'练习图片')}<div class="ept-question">请想象你是A。请用<span class="ept-required">B开头</span>，<span class="ept-required">使用括号里的动词</span>，写一个完整、自然的句子，说明B发生了什么<span class="ept-change">变化</span>。<br><span class="ept-verb">（动词：${eptVerbLabel('睡觉')}）</span></div></div>`,html:'<input class="ept-answer awaiting-reveal" name="practice" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation('practice','睡觉',true);attachSequentialEpt('practice');},on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,'睡觉');}});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请想象你是A。请用B开头，使用括号里的动词，写一个完整、自然的句子，直接描述B发生的变化。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
- eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div>${sequentialEptImage(it.img,'实验图片')}<div class="ept-question">请想象你是A。请用<span class="ept-required">B开头</span>，<span class="ept-required">使用括号里的动词</span>，写一个完整、自然的句子，说明B发生了什么<span class="ept-change">变化</span>。<br><span class="ept-verb">（动词：${eptVerbLabel(it.verb)}）</span></div></div>`,html:`<input class="ept-answer awaiting-reveal" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation(`ept_${it.id}`,it.verb);attachSequentialEpt(`ept_${it.id}`);},on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,it.verb);}}));
+ eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div>${sequentialEptImage(it.img,'实验图片')}<div class="ept-question">请想象你是A。请用<span class="ept-required">B开头</span>，<span class="ept-required">使用括号里的动词</span>，写一个完整、自然的句子，说明B发生了什么<span class="ept-change">变化</span>。<br><span class="ept-verb">（动词：${eptVerbLabel(it.verb)}）</span></div></div>`,html:`<input class="ept-answer awaiting-reveal" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1,presentation_block:it.presentation_block,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation(`ept_${it.id}`,it.verb);attachSequentialEpt(`ept_${it.id}`);},on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,it.verb);}}));
  return t;
 }
 function ajtTimeline(){
@@ -344,7 +368,7 @@ function ajtTimeline(){
  t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习1</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王的衣服全湿了。</div>',labels:scale,required:true}],button_label:'下一道练习'});
  t.push({type:jsPsychSurveyLikert,questions:[{prompt:'<div class="trial-counter">练习2</div><div class="ajt-context">外面正在下大雨，小王没有带伞。<div class="ajt-lead-in">在这个情境中，有人这样说：</div></div><div class="ajt-sentence">小王全衣服湿了。</div>',labels:scale,required:true}],button_label:'提交练习'});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务没有标准答案，请结合具体情境，根据自己的第一感觉判断句子的自然程度。</div>',choices:['开始正式任务']});
- ajtItems.forEach((it,i)=>t.push({type:jsPsychSurveyLikert,questions:[{prompt:`<div class="trial-counter">判断题 ${i+1} / ${ajtItems.length}</div><div class="ajt-context">${it.context}<div class="ajt-lead-in">${it.lead_in||'在这个情境中，有人这样说：'}</div></div><div class="ajt-sentence">${it.sentence}</div>`,labels:scale,required:true,name:`ajt_${it.id}`}],button_label:'下一题',data:{task_type:'AJT',item_id:it.id,variable:it.variable||'filler',condition:it.condition,version:it.version||null,scene:it.scene,stimulus_context:it.context,stimulus_lead_in:it.lead_in||null,stimulus_sentence:it.sentence,presentation_order:i+1}}));
+ ajtItems.forEach((it,i)=>t.push({type:jsPsychSurveyLikert,questions:[{prompt:`<div class="trial-counter">判断题 ${i+1} / ${ajtItems.length}</div><div class="ajt-context">${it.context}<div class="ajt-lead-in">${it.lead_in||'在这个情境中，有人这样说：'}</div></div><div class="ajt-sentence">${it.sentence}</div>`,labels:scale,required:true,name:`ajt_${it.id}`}],button_label:'下一题',data:{task_type:'AJT',item_id:it.id,variable:it.variable||'filler',condition:it.condition,version:it.version||null,scene:it.scene,stimulus_context:it.context,stimulus_lead_in:it.lead_in||null,stimulus_sentence:it.sentence,presentation_order:i+1,presentation_block:it.presentation_block}}));
  return t;
 }
 const EPT=eptTimeline(),AJT=ajtTimeline(); const first=task_order==='EPT_AJT'?EPT:AJT, second=task_order==='EPT_AJT'?AJT:EPT;
