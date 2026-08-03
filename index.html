@@ -25,6 +25,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;box-sh
 .instruction-scale{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 0 14px;padding:12px 0;border-top:1px solid #93c5fd;border-bottom:1px solid #93c5fd;font-size:17px;font-weight:750;color:#0f3d66}
 .instruction-scale .scale-middle{font-weight:500;color:#64748b;text-align:center}
 .ept-pinyin{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:550;color:#475569;margin-left:5px}
+.ept-question .ept-required{color:#9a3412;font-weight:800}
+.ept-question .ept-change,.ept-phase-cue .ept-change{color:#b91c1c;font-weight:800}
 @media(max-width:760px){.instruction-lead{font-size:20px}.instruction-steps{font-size:16px}.instruction-scale{align-items:flex-start;flex-direction:column;gap:4px}.instruction-scale .scale-middle{display:none}}
 </style>
 </head><body><script>
@@ -34,8 +36,8 @@ const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP
 const urlParams=new URLSearchParams(window.location.search);
 const urlCell=urlParams.get('cell');
 const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
-const STUDY_VERSION='final_v13_2026-08-03';
-const ASSET_VERSION='final-v7-20260803';
+const STUDY_VERSION='final_v14_2026-08-03';
+const ASSET_VERSION='final-v8-20260803';
 const versionedAsset=path=>`${path}?v=${ASSET_VERSION}`;
 const cellMap={
   '1':{task_order:'EPT_AJT',ajt_list:'A'},
@@ -98,7 +100,7 @@ function attachSequentialEpt(fieldName){
  setTimeout(()=>{
    stage.classList.add('revealed','reveal-flash');
    stage.closest('.ept-wrap')?.classList.remove('awaiting-right');
-   cue.textContent='右图已经出现：比较前后的变化';
+   cue.innerHTML='右图已经出现：比较前后的<span class="ept-change">变化</span>';
    input.disabled=false;
    input.classList.remove('awaiting-reveal');
    if(submit)submit.disabled=false;
@@ -331,9 +333,9 @@ function eptTimeline(){
    timeline:[eptComprehensionCheck],
    loop_function:data=>data.last(1).values()[0]?.comprehension_correct!==true
  });
- t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">练习题</div>${sequentialEptImage(PRACTICE_IMAGE,'练习图片')}<div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：${eptVerbLabel('睡觉')}）</span></div></div>`,html:'<input class="ept-answer awaiting-reveal" name="practice" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation('practice','睡觉',true);attachSequentialEpt('practice');},on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,'睡觉');}});
+ t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">练习题</div>${sequentialEptImage(PRACTICE_IMAGE,'练习图片')}<div class="ept-question">请想象你是A。请用<span class="ept-required">B开头</span>，<span class="ept-required">使用括号里的动词</span>，写一个完整、自然的句子，说明B发生了什么<span class="ept-change">变化</span>。<br><span class="ept-verb">（动词：${eptVerbLabel('睡觉')}）</span></div></div>`,html:'<input class="ept-answer awaiting-reveal" name="practice" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">',button_label:'提交练习',data:{task_type:'EPT_practice',stimulus_verb:'睡觉',image_path:PRACTICE_IMAGE,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation('practice','睡觉',true);attachSequentialEpt('practice');},on_finish:d=>{const a=(d.response?.practice||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,'睡觉');}});
  t.push({type:jsPsychHtmlButtonResponse,stimulus:'<div class="info-box">练习结束。正式任务中，请想象你是A。请用B开头，使用括号里的动词，写一个完整、自然的句子，直接描述B发生的变化。不同的自然表达都可以，不要求与示例完全相同。</div>',choices:['开始正式任务']});
- eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div>${sequentialEptImage(it.img,'实验图片')}<div class="ept-question">请想象你是A。请用B开头，写一个完整、自然的句子，说明B发生了什么变化。<br><span class="ept-verb">（动词：${eptVerbLabel(it.verb)}）</span></div></div>`,html:`<input class="ept-answer awaiting-reveal" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation(`ept_${it.id}`,it.verb);attachSequentialEpt(`ept_${it.id}`);},on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,it.verb);}}));
+ eptItems.forEach((it,i)=>t.push({type:jsPsychSurveyHtmlForm,preamble:`<div class="ept-wrap awaiting-right"><div class="trial-counter">图片题 ${i+1} / ${eptItems.length}</div>${sequentialEptImage(it.img,'实验图片')}<div class="ept-question">请想象你是A。请用<span class="ept-required">B开头</span>，<span class="ept-required">使用括号里的动词</span>，写一个完整、自然的句子，说明B发生了什么<span class="ept-change">变化</span>。<br><span class="ept-verb">（动词：${eptVerbLabel(it.verb)}）</span></div></div>`,html:`<input class="ept-answer awaiting-reveal" name="ept_${it.id}" required minlength="4" autocomplete="off" placeholder="请用B开头输入完整句子">`,button_label:'提交并下一题',data:{task_type:'EPT',item_id:it.id,item_type:it.type,scene:it.scene,target_family:it.family||null,expected_goal:it.goal||null,stimulus_verb:it.verb||null,image_path:it.img,presentation_order:i+1,right_reveal_delay_ms:EPT_RIGHT_REVEAL_DELAY},on_load:()=>{attachEptValidation(`ept_${it.id}`,it.verb);attachSequentialEpt(`ept_${it.id}`);},on_finish:d=>{const key=`ept_${it.id}`;const a=(d.response?.[key]||'').trim();d.answer_length=normalizeAnswer(a).length;d.started_with_b=answerStartsWithB(a);d.used_required_verb=answerUsesVerb(a,it.verb);}}));
  return t;
 }
 function ajtTimeline(){
