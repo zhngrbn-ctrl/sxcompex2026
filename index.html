@@ -30,12 +30,15 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;box-sh
 </style>
 </head><body><script>
 function getAgeOptions(){let s='<option value="" disabled selected>请选择</option>';for(let i=16;i<=60;i++)s+=`<option value="${i}">${i}岁</option>`;return s;}
-const jsPsych=initJsPsych({show_progress_bar:true,message_progress_bar:'实验总进度',on_data_update:(d)=>{try{localStorage.setItem('directional_exp_backup',jsPsych.data.get().json())}catch(e){}}});
+const BACKUP_KEY='directional_exp_backup';
+let recoveryPromptActive=false;
+let backupSuppressed=false;
+const jsPsych=initJsPsych({show_progress_bar:true,message_progress_bar:'实验总进度',on_data_update:()=>{if(!recoveryPromptActive&&!backupSuppressed)saveLocalBackup();}});
 const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP-'+Math.floor(Math.random()*900000+100000);
 const urlParams=new URLSearchParams(window.location.search);
 const urlCell=urlParams.get('cell');
 const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
-const STUDY_VERSION='final_v18_2026-08-07';
+const STUDY_VERSION='final_v19_2026-08-07';
 const ASSET_VERSION='final-v9-20260807';
 const ITEM_RANDOMIZATION_VERSION='balanced-block-v2';
 const MATERIAL_SET_VERSION='ept-v1_ajt-v2_20260807';
@@ -55,17 +58,84 @@ const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
 const upload_filename=`${experiment_phase}_${subject_id}.csv`;
+const BACKUP_SCHEMA_VERSION=2;
+let backupWriteFailed=false;
+let lastBackupSavedAt='';
+function saveLocalBackup(){
+  try{
+    const snapshot={schema_version:BACKUP_SCHEMA_VERSION,saved_at:new Date().toISOString(),subject_id,upload_filename,experiment_phase,allocation_cell,study_version:STUDY_VERSION,csv:jsPsych.data.get().csv()};
+    localStorage.setItem(BACKUP_KEY,JSON.stringify(snapshot));
+    backupWriteFailed=false;
+    lastBackupSavedAt=snapshot.saved_at;
+  }catch(error){
+    backupWriteFailed=true;
+    console.warn('Local backup could not be saved',error);
+  }
+}
+function readLocalBackup(){
+  try{
+    const raw=localStorage.getItem(BACKUP_KEY);
+    if(!raw)return null;
+    const snapshot=JSON.parse(raw);
+    if(snapshot?.schema_version!==BACKUP_SCHEMA_VERSION||!snapshot.csv||!snapshot.upload_filename)return null;
+    return snapshot;
+  }catch(error){return null;}
+}
+function clearLocalBackup(){try{localStorage.removeItem(BACKUP_KEY)}catch(error){}}
+function downloadCsvBackup(csv,filename){
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function hasRecoverableBackup(){return Boolean(readLocalBackup());}
 jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,experiment_phase,study_version:STUDY_VERSION,material_set_version:MATERIAL_SET_VERSION,item_randomization_version:ITEM_RANDOMIZATION_VERSION,datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
+let recoveryChoice='new';
+const initialRecoverableBackup=hasRecoverableBackup();
+recoveryPromptActive=initialRecoverableBackup;
+timeline.push({
+  timeline:[
+    {type:jsPsychHtmlButtonResponse,stimulus:'<h3>发现未确认上传的数据</h3><div class="info-box"><p>浏览器中发现一份上次实验的本地数据备份。您可以先尝试重新上传，或开始新的实验。</p><p class="small-note">如果您刚才中途关闭了页面，建议选择“重新上传上次数据”。</p></div>',choices:['开始新的实验','重新上传上次数据'],data:{task_type:'backup_recovery_prompt'},on_finish:d=>{if(d.response===1){recoveryChoice='recover';recoveryPromptActive=true;}else{recoveryChoice='new';recoveryPromptActive=false;clearLocalBackup();}}},
+    {type:jsPsychHtmlButtonResponse,stimulus:'<h3>正在恢复数据</h3><div id="recovery-status" style="font-size:18px;line-height:1.8">正在重新上传上次数据，请保持页面打开……</div>',choices:[],data:{task_type:'backup_recovery_upload'},on_load:async()=>{
+      if(recoveryChoice!=='recover'){
+        jsPsych.finishTrial({recovery_status:'skipped'});
+        return;
+      }
+      const backup=readLocalBackup();
+      const status=document.getElementById('recovery-status');
+      if(!backup){
+        recoveryPromptActive=false;
+        status.innerHTML='<div class="warn-box"><strong>找不到可恢复的备份。</strong><br>请重新开始实验。</div>';
+        jsPsych.finishTrial({recovery_status:'missing'});
+        return;
+      }
+      try{
+        const result=await uploadDataCsvToDataPipe(backup.csv,backup.upload_filename);
+        clearLocalBackup();
+        jsPsych.endExperiment(`<div class="info-box" style="max-width:680px;margin:80px auto;text-align:center"><h3>数据已重新提交</h3><p>上次实验的数据已经重新提交。请关闭此页面，不要再次开始实验。</p><p class="small-note">上传状态：${result.message||'Success'}</p></div>`);
+      }catch(error){
+        status.innerHTML=`<div class="warn-box"><strong>上次数据暂时未能上传。</strong><br>错误代码：${error.code||'UNKNOWN_ERROR'}</div><p>请下载备份并发送给主试，或关闭页面后稍后重新打开本链接。</p><button id="recovery-backup-btn" class="jspsych-btn">下载上次数据备份</button>`;
+        document.getElementById('recovery-backup-btn').onclick=()=>downloadCsvBackup(backup.csv,backup.upload_filename.replace(/\.csv$/,'_backup.csv'));
+      }
+    }}
+  ],
+  conditional_function:()=>initialRecoverableBackup
+});
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1":"assets/ept_01.png","2":"assets/ept_02.png","3":"assets/ept_03.png","4":"assets/ept_04.png","5":"assets/ept_05.png","6":"assets/ept_06.png","7":"assets/ept_07.png","8":"assets/ept_08.png","9":"assets/ept_09.png","10":"assets/ept_10_跑出教室去_v1.png","11":"assets/ept_11_跑上二楼去_v7_B标签靠近人物.png","12":"assets/ept_12_划出山洞来.png","13":"assets/ept_13_冲出图书馆来.png","14":"assets/ept_14_钻进帐篷去.png","15":"assets/ept_15_跳下舞台去.png","16":"assets/ept_16_爬上观景台来.png","17":"assets/ept_17_写会议要点.png","18":"assets/ept_18_拍照.png","19":"assets/ept_19_跑步.png","20":"assets/ept_20.png","21":"assets/ept_21.png","22":"assets/ept_22.png","23":"assets/ept_23.png","24":"assets/ept_24.png","25":"assets/ept_25.png","26":"assets/ept_26.png","27":"assets/ept_27.png","28":"assets/ept_28.png"};
 Object.keys(IMAGE_PATHS).forEach(key=>{IMAGE_PATHS[key]=versionedAsset(IMAGE_PATHS[key]);});
 const EXAMPLE_IMAGE=versionedAsset('assets/example.png');
 const PRACTICE_IMAGE=versionedAsset('assets/practice.png');
-const PRELOAD_CONCURRENCY=3;
+const PRELOAD_CONCURRENCY=2;
 const PRELOAD_RETRIES=3;
-const PRELOAD_RETRY_DELAY_MS=700;
-const PRELOAD_IMAGE_TIMEOUT_MS=15000;
+const PRELOAD_RETRY_DELAY_MS=1000;
+const PRELOAD_IMAGE_TIMEOUT_MS=20000;
 const PRELOAD_ASSETS=[...new Set([...Object.values(IMAGE_PATHS),EXAMPLE_IMAGE,PRACTICE_IMAGE])];
 
 // ---------- utilities ----------
@@ -495,19 +565,11 @@ function validateExperimentData(){
 }
 
 function downloadLocalBackup(){
-  const blob=new Blob(['\ufeff'+jsPsych.data.get().csv()],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=`${subject_id}_backup.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  downloadCsvBackup(jsPsych.data.get().csv(),`${subject_id}_backup.csv`);
 }
 
-const DATA_PIPE_TIMEOUT_MS=30000;
-async function uploadToDataPipe(){
+const DATA_PIPE_TIMEOUT_MS=45000;
+async function uploadDataCsvToDataPipe(csv,filename){
   const controller=typeof AbortController==='function'?new AbortController():null;
   const timeoutId=controller?setTimeout(()=>controller.abort(),DATA_PIPE_TIMEOUT_MS):null;
   let response;
@@ -518,8 +580,8 @@ async function uploadToDataPipe(){
       signal:controller?.signal,
       body:JSON.stringify({
         experimentID:DATA_PIPE_EXPERIMENT_ID,
-        filename:upload_filename,
-        data:jsPsych.data.get().csv()
+        filename,
+        data:csv
       })
     });
   }catch(error){
@@ -536,6 +598,9 @@ async function uploadToDataPipe(){
   error.code=result.error||`HTTP_${response.status}`;
   error.httpStatus=response.status;
   throw error;
+}
+async function uploadToDataPipe(){
+  return uploadDataCsvToDataPipe(jsPsych.data.get().csv(),upload_filename);
 }
 
 timeline.push({
@@ -567,7 +632,7 @@ timeline.push({
      return;
    }
    let attempts=0;
-   const maxAttempts=3;
+   const maxAttempts=5;
    const tryUpload=async()=>{
      attempts+=1;
      status.innerHTML=`
@@ -576,23 +641,27 @@ timeline.push({
      `;
      try{
        const result=await uploadToDataPipe();
-       try{localStorage.removeItem('directional_exp_backup')}catch(e){}
+       const backupRetained=result.accepted===true;
+       if(!backupRetained){clearLocalBackup();backupSuppressed=true;}
+       jsPsych.data.addProperties({local_backup_write_failed:backupWriteFailed,last_backup_saved_at:lastBackupSavedAt});
        jsPsych.finishTrial({
          upload_success:true,
          upload_attempts:attempts,
          upload_result:result.message||'',
          upload_http_status:result.http_status||'',
          upload_accepted_async:result.accepted===true,
+         local_backup_retained_after_202:backupRetained,
          upload_recovered_from_existing_file:result.recoveredFrom||'',
          upload_completed_at:new Date().toISOString()
        });
      }catch(error){
        if(attempts<maxAttempts){
+         const retryDelay=Math.min(20000,5000*attempts);
          status.innerHTML=`
-           <p style="color:#b45309;"><strong>本次上传未成功，系统将在5秒后自动重试。</strong></p>
+           <p style="color:#b45309;"><strong>本次上传未成功，系统将在${retryDelay/1000}秒后自动重试。</strong></p>
            <p style="color:#64748b;font-size:14px;">错误代码：${error.code||'UNKNOWN_ERROR'}</p>
          `;
-         setTimeout(tryUpload,5000);
+         setTimeout(tryUpload,retryDelay);
        }else{
          status.innerHTML=`
            <div class="warn-box"><strong>数据暂时未能上传成功。</strong><br>错误代码：${error.code||'UNKNOWN_ERROR'}</div>
@@ -624,5 +693,9 @@ timeline.push({
  `,
  choices:[]
 });
-jsPsych.run(timeline);
+ if(experiment_phase==='formal'&&!assignedCell){
+   document.querySelector('#jspsych-target').innerHTML='<div class="warn-box" style="max-width:680px;margin:80px auto;text-align:center"><h3>链接无效</h3><p>正式实验链接缺少有效的 cell 参数。请返回主试提供的链接重新打开。</p></div>';
+ }else{
+   jsPsych.run(timeline);
+ }
 </script></body></html>
