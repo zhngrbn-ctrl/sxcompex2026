@@ -35,9 +35,10 @@ const subject_id=jsPsych.randomization.randomID(10); const completion_code='COMP
 const urlParams=new URLSearchParams(window.location.search);
 const urlCell=urlParams.get('cell');
 const experiment_phase=((urlParams.get('phase')||'unspecified').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||'unspecified');
-const STUDY_VERSION='final_v17_2026-08-05';
-const ASSET_VERSION='final-v8-20260803';
-const ITEM_RANDOMIZATION_VERSION='balanced-block-v1';
+const STUDY_VERSION='final_v18_2026-08-07';
+const ASSET_VERSION='final-v9-20260807';
+const ITEM_RANDOMIZATION_VERSION='balanced-block-v2';
+const MATERIAL_SET_VERSION='ept-v1_ajt-v2_20260807';
 const versionedAsset=path=>`${path}?v=${ASSET_VERSION}`;
 const cellMap={
   '1':{task_order:'EPT_AJT',ajt_list:'A'},
@@ -54,7 +55,7 @@ const OSF_PROJECT_ID='954m6';
 const OSF_DATA_COMPONENT_ID='t835v';
 const RESEARCHER_EMAIL='devitsuk057@gmail.com';
 const upload_filename=`${experiment_phase}_${subject_id}.csv`;
-jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,experiment_phase,study_version:STUDY_VERSION,item_randomization_version:ITEM_RANDOMIZATION_VERSION,datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
+jsPsych.data.addProperties({subject_id,completion_code,task_order,ajt_list,allocation_cell,experiment_phase,study_version:STUDY_VERSION,material_set_version:MATERIAL_SET_VERSION,item_randomization_version:ITEM_RANDOMIZATION_VERSION,datapipe_experiment_id:DATA_PIPE_EXPERIMENT_ID,osf_project_id:OSF_PROJECT_ID,osf_data_component_id:OSF_DATA_COMPONENT_ID});
 const timeline=[];
 let page_blur_count=0; document.addEventListener('visibilitychange',()=>{if(document.hidden)page_blur_count++;});
 const IMAGE_PATHS={"1":"assets/ept_01.png","2":"assets/ept_02.png","3":"assets/ept_03.png","4":"assets/ept_04.png","5":"assets/ept_05.png","6":"assets/ept_06.png","7":"assets/ept_07.png","8":"assets/ept_08.png","9":"assets/ept_09.png","10":"assets/ept_10_跑出教室去_v1.png","11":"assets/ept_11_跑上二楼去_v7_B标签靠近人物.png","12":"assets/ept_12_划出山洞来.png","13":"assets/ept_13_冲出图书馆来.png","14":"assets/ept_14_钻进帐篷去.png","15":"assets/ept_15_跳下舞台去.png","16":"assets/ept_16_爬上观景台来.png","17":"assets/ept_17_写会议要点.png","18":"assets/ept_18_拍照.png","19":"assets/ept_19_跑步.png","20":"assets/ept_20.png","21":"assets/ept_21.png","22":"assets/ept_22.png","23":"assets/ept_23.png","24":"assets/ept_24.png","25":"assets/ept_25.png","26":"assets/ept_26.png","27":"assets/ept_27.png","28":"assets/ept_28.png"};
@@ -267,14 +268,14 @@ const eptItems=makeEptOrder(eptItemsRaw);
 
 // ---------- AJT target frames from AJT目标题候选定稿.docx ----------
 const ajtFrames=[
-{id:'V1_01',lead_in:'这时，我说：',variable:'V1',scene:'office',context:'我坐在办公桌旁。同事站在门口，手里拿着一份需要我签字的文件。',A:'过一会儿，同事把文件拿过来了。',B:'过一会儿，同事把文件拿过去了。',legal:'A'},
-{id:'V1_02',lead_in:'这时，我说：',variable:'V1',scene:'private_room',context:'我和服务员都在厨房门口，服务员手里端着饭菜。客人坐在包间的餐桌旁。',A:'过一会儿，服务员把饭菜端过去了。',B:'过一会儿，服务员把饭菜端过来了。',legal:'A'},
-{id:'V1_03',lead_in:'这时，我说：',variable:'V1',scene:'meeting_room',context:'我们正在会议室开会，发现还少一把椅子。同事去隔壁办公室找了一把。',A:'过一会儿，同事把椅子推过来了。',B:'过一会儿，同事把椅子推过去了。',legal:'A'},
-{id:'V1_04',lead_in:'这时，我说：',variable:'V1',scene:'sports_field',context:'我和同学站在操场的一边，足球就在我们旁边。几个朋友在操场的另一边等着踢球。',A:'过一会儿，同学把足球踢过去了。',B:'过一会儿，同学把足球踢过来了。',legal:'A'},
-{id:'V1_05',lead_in:'这时，我说：',variable:'V1',scene:'reception',context:'我在接待处等新同学。老师和新同学还在大厅的另一边。',A:'过一会儿，老师把新同学带过来了。',B:'过一会儿，老师把新同学带过去了。',legal:'A'},
-{id:'V1_06',lead_in:'这时，我说：',variable:'V1',scene:'living_room',context:'我和朋友都在客厅，茶几上放着一杯水。在阳台上晒太阳的奶奶说口渴了。',A:'过一会儿，朋友把水送过去了。',B:'过一会儿，朋友把水送过来了。',legal:'A'},
-{id:'V1_07',lead_in:'这时，我说：',variable:'V1',scene:'library',context:'我在阅览桌旁查一个生词。一名学生在书架旁抱着一本很厚的字典。',A:'过一会儿，学生把那本字典抱过来了。',B:'过一会儿，学生把那本字典抱过去了。',legal:'A'},
-{id:'V1_08',lead_in:'这时，我说：',variable:'V1',scene:'classroom',context:'我在讲台旁边帮老师整理东西，讲台旁放着一张备用桌子。老师发现教室最后一排还少一张桌子，两个学生正站在我们旁边。',A:'过一会儿，两个学生把桌子抬过去了。',B:'过一会儿，两个学生把桌子抬过来了。',legal:'A'},
+{id:'V1_01',lead_in:'这时，我说：',variable:'V1',scene:'office',context:'我一直坐在办公桌旁，没有移动。同事站在门口，手里拿着一份需要我签字的文件。',A:'过一会儿，同事把文件拿过来了。',B:'过一会儿，同事把文件拿过去了。',legal:'A'},
+{id:'V1_02',lead_in:'这时，我说：',variable:'V1',scene:'private_room',context:'我一直站在厨房门口，没有移动。服务员在门口端着饭菜，包间在另一边。',A:'过一会儿，服务员把饭菜端过去了。',B:'过一会儿，服务员把饭菜端过来了。',legal:'A'},
+{id:'V1_03',lead_in:'这时，我说：',variable:'V1',scene:'meeting_room',context:'我一直在会议室里，没有移动。会议室还少一把椅子，同事在隔壁办公室找到了一把。',A:'过一会儿，同事把椅子推过来了。',B:'过一会儿，同事把椅子推过去了。',legal:'A'},
+{id:'V1_04',lead_in:'这时，我说：',variable:'V1',scene:'sports_field',context:'我一直站在操场西边，没有移动。同学和足球在我旁边，操场东边有一个球门。',A:'过一会儿，同学把足球踢过去了。',B:'过一会儿，同学把足球踢过来了。',legal:'A'},
+{id:'V1_05',lead_in:'这时，我说：',variable:'V1',scene:'reception',context:'我一直站在接待处，没有移动。老师和新同学在大厅另一边。',A:'过一会儿，老师把新同学带过来了。',B:'过一会儿，老师把新同学带过去了。',legal:'A'},
+{id:'V1_06',lead_in:'这时，我说：',variable:'V1',scene:'living_room',context:'我一直坐在客厅里，没有移动。茶几上放着一杯水，阳台上有一张桌子。',A:'过一会儿，朋友把水送过去了。',B:'过一会儿，朋友把水送过来了。',legal:'A'},
+{id:'V1_07',lead_in:'这时，我说：',variable:'V1',scene:'library',context:'我一直坐在阅览桌旁，没有移动。一名学生抱着字典，从书架旁走到我面前。',A:'过一会儿，学生把那本字典抱过来了。',B:'过一会儿，学生把那本字典抱过去了。',legal:'A'},
+{id:'V1_08',lead_in:'这时，我说：',variable:'V1',scene:'classroom',context:'我一直站在讲台旁，没有移动。讲台旁有一张备用桌子，教室后排还缺一张桌子。',A:'过一会儿，两个学生把桌子抬过去了。',B:'过一会儿，两个学生把桌子抬过来了。',legal:'A'},
 {id:'V2_01',lead_in:'这时，我说：',variable:'V2',scene:'office',context:'我正在办公室里工作。同事在门外，手里拿着一份文件。',A:'同事准备把文件拿进办公室来。',B:'同事准备把文件拿进来办公室。',legal:'A'},
 {id:'V2_02',lead_in:'这时，我说：',variable:'V2',scene:'warehouse',context:'我和工人都在仓库里，最后一箱货物放在工人旁边。外面的货车还在等这箱货物。',A:'工人准备把这箱货物搬出仓库去。',B:'工人准备把这箱货物搬出去仓库。',legal:'A'},
 {id:'V2_03',lead_in:'这时，我说：',variable:'V2',scene:'private_room',context:'我在包间里招待客人。服务员在门外，茶已经准备好了。',A:'服务员准备把茶端进包间来。',B:'服务员准备把茶端进来包间。',legal:'A'},
@@ -283,14 +284,14 @@ const ajtFrames=[
 {id:'V2_06',lead_in:'这时，我说：',variable:'V2',scene:'meeting_room',context:'我在会议室里等参会人员。助理在门外，手里拿着会议材料。',A:'助理准备把材料送进会议室来。',B:'助理准备把材料送进来会议室。',legal:'A'},
 {id:'V2_07',lead_in:'这时，我说：',variable:'V2',scene:'dorm',context:'我在宿舍里整理家具。两个同学在门外扶着一张桌子。',A:'两个同学准备把桌子抬进宿舍来。',B:'两个同学准备把桌子抬进来宿舍。',legal:'A'},
 {id:'V2_08',lead_in:'这时，我说：',variable:'V2',scene:'hillside',context:'我和小王都在山脚，食物放在小王旁边。山坡上的朋友正在等我们送食物。',A:'小王准备把食物拿上山坡去。',B:'小王准备把食物拿上去山坡。',legal:'A'},
-{id:'V3_01',lead_in:'这时，我说：',variable:'V3',scene:'room_picture',context:'我在房间里整理东西。同学在门外，手里拿着一张准备挂到墙上的画。',A:'过一会儿，同学把画拿进房间来了。',B:'过一会儿，同学把画拿进房间去了。',legal:'A'},
-{id:'V3_02',lead_in:'这时，我说：',variable:'V3',scene:'lobby',context:'我在大厅里等工作人员。工作人员在门外扶着一辆轮椅。',A:'过一会儿，工作人员把轮椅推进大厅来了。',B:'过一会儿，工作人员把轮椅推进大厅去了。',legal:'A'},
-{id:'V3_03',lead_in:'这时，我说：',variable:'V3',scene:'office',context:'我和助理都在办公室门外。领导正在里面等一份文件，我还要留在走廊接待客人。',A:'过一会儿，助理把文件送进办公室去了。',B:'过一会儿，助理把文件送进办公室来了。',legal:'A'},
-{id:'V3_04',lead_in:'这时，我说：',variable:'V3',scene:'reception_room',context:'我和工作人员都在接待室门外。新来的客人需要先在里面登记，我还要留在门口等其他人。',A:'过一会儿，工作人员把客人带进接待室去了。',B:'过一会儿，工作人员把客人带进接待室来了。',legal:'A'},
-{id:'V3_05',lead_in:'这时，我说：',variable:'V3',scene:'stairs',context:'我们吃完饭回办公室，到了门口才发现大家都没有带钥匙。唯一带钥匙的同事还在楼下。',A:'过一会儿，同事把钥匙拿上楼来了。',B:'过一会儿，同事把钥匙拿上楼去了。',legal:'A'},
-{id:'V3_06',lead_in:'这时，我说：',variable:'V3',scene:'dorm_building',context:'我和同学到了宿舍楼下。楼上的室友身体不舒服，正在等我们送药，我要留在楼下看行李。',A:'过一会儿，同学把药拿上楼去了。',B:'过一会儿，同学把药拿上楼来了。',legal:'A'},
-{id:'V3_07',lead_in:'这时，我说：',variable:'V3',scene:'school',context:'老师正在楼下办公室给我讲错题，暂时抽不开身。楼上教室里还有大家的作业，他让班长负责收齐后交给他。',A:'过一会儿，班长把作业送下楼来了。',B:'过一会儿，班长把作业送下楼去了。',legal:'A'},
-{id:'V3_08',lead_in:'这时，我说：',variable:'V3',scene:'restaurant',context:'我们几个服务员正在餐厅里整理餐具。这时，花园里的客人点了一壶茶。',A:'过一会儿，服务员小王把茶端出餐厅去了。',B:'过一会儿，服务员小王把茶端出餐厅来了。',legal:'A'}];
+{id:'V3_01',lead_in:'这时，我说：',variable:'V3',scene:'room_picture',context:'我一直在房间里整理东西，没有移动。同学在门外，手里拿着一张准备挂到墙上的画。',A:'过一会儿，同学把画拿进房间来了。',B:'过一会儿，同学把画拿进房间去了。',legal:'A'},
+{id:'V3_02',lead_in:'这时，我说：',variable:'V3',scene:'lobby',context:'我一直在大厅里等候，没有移动。工作人员在门外扶着一辆轮椅，大厅里没有其他人。',A:'过一会儿，工作人员把轮椅推进大厅来了。',B:'过一会儿，工作人员把轮椅推进大厅去了。',legal:'A'},
+{id:'V3_03',lead_in:'这时，我说：',variable:'V3',scene:'office',context:'我和助理都在办公室门外。我一直留在走廊，没有进入办公室。文件在助理手里，办公室就在我们身后。',A:'过一会儿，助理把文件送进办公室去了。',B:'过一会儿，助理把文件送进办公室来了。',legal:'A'},
+{id:'V3_04',lead_in:'这时，我说：',variable:'V3',scene:'reception_room',context:'我一直在接待室门外等候，没有移动。工作人员在门外，手里拿着一份文件，接待室里暂时没有人。',A:'过一会儿，工作人员把文件拿进接待室去了。',B:'过一会儿，工作人员把文件拿进接待室来了。',legal:'A'},
+{id:'V3_05',lead_in:'这时，我说：',variable:'V3',scene:'stairs',context:'我一直站在办公室门口，没有移动。同事在楼下，手里拿着一把钥匙。',A:'过一会儿，同事把钥匙拿上楼来了。',B:'过一会儿，同事把钥匙拿上楼去了。',legal:'A'},
+{id:'V3_06',lead_in:'这时，我说：',variable:'V3',scene:'dorm_building',context:'我和同学到了宿舍楼下。我一直留在楼下看行李，药在同学手里，楼上的房间空着。',A:'过一会儿，同学把药拿上楼去了。',B:'过一会儿，同学把药拿上楼来了。',legal:'A'},
+{id:'V3_07',lead_in:'这时，我说：',variable:'V3',scene:'school',context:'我一直在楼下办公室整理作业，没有移动。班长在楼上教室，手里拿着刚收齐的作业。',A:'过一会儿，班长把作业送下楼来了。',B:'过一会儿，班长把作业送下楼去了。',legal:'A'},
+{id:'V3_08',lead_in:'这时，我说：',variable:'V3',scene:'restaurant',context:'我和几名服务员一直在餐厅里整理餐具，没有移动。花园里的桌子上需要放一壶茶。',A:'过一会儿，服务员小王把茶端出餐厅去了。',B:'过一会儿，服务员小王把茶端出餐厅来了。',legal:'A'}];
 const listPatternA={V1:['A','B','A','A','B','A','B','B'],V2:['B','A','B','A','A','B','A','B'],V3:['A','B','B','A','B','A','A','B']};
 const listPatternB={V1:['B','A','B','B','A','B','A','A'],V2:['A','B','A','B','B','A','B','A'],V3:['B','A','A','B','A','B','B','A']};
 const patterns=ajt_list==='A'?listPatternA:listPatternB; const counters={V1:0,V2:0,V3:0};
@@ -406,8 +407,12 @@ function eptTimeline(){
    button_label:'提交确认',
    data:{task_type:'EPT_comprehension'},
    on_finish:d=>{
-     d.comprehension_correct=d.response?.a_role==='self'&&d.response?.answer_rule==='b_verb_sentence';
-     if(!d.comprehension_correct) alert('有一项回答不正确，请重新确认任务要求。');
+     const feedback=[];
+     if(d.response?.a_role!=='self') feedback.push('第1题：A代表正在作答的你，不是B，也不是主试。');
+     if(d.response?.answer_rule!=='b_verb_sentence') feedback.push('第2题：请用B开头，使用括号里的动词，写一个完整句子。');
+     d.comprehension_correct=feedback.length===0;
+     d.comprehension_feedback=feedback.join(' ');
+     if(feedback.length) alert('请重新确认下面的要求：\n\n'+feedback.join('\n'));
    }
  };
  t.push({
